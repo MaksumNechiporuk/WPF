@@ -15,13 +15,14 @@ using System.Windows.Shapes;
 
 namespace Login
 {
-   public class Person
+    [Serializable]
+    public class Person
     {
         public string FirstName { get; set; }
         public string SecondName { get; set; }
 
         public string Number { get; set; }
-        public Image img { get; set; }
+        public string PathImg { get; set; }
 
         public string Company { get; set; }
         public string Adress { get; set; }
@@ -29,12 +30,16 @@ namespace Login
         public string Email { get; set; }
 
         public string Passw { get; set; }
-        public Person(string firstN,string SecondN,string number,Image i,string company,string adress,string email,string passwd)
+        public Person()
+        {
+
+        }
+        public Person(string firstN,string SecondN,string number,string Path, string company,string adress,string email,string passwd)
         {
             FirstName = firstN;
             SecondName = SecondN;
             Number = number;
-            img = i;
+            PathImg = Path;
             Company = company;
             Adress = adress;
             Email = email;

@@ -1,18 +1,12 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization.Json;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+using System.Xml.Serialization;
 
 namespace Login
 {
@@ -21,48 +15,144 @@ namespace Login
     /// </summary>
     public partial class MainWindow : Window
     {
-        OpenFileDialog myDialog = new OpenFileDialog();
+
         List<Person> people = new List<Person>();
+
         public MainWindow()
         {
             InitializeComponent();
         }
 
-        
+        Window1 window;
 
-        private void Img_MouseEnter(object sender, MouseEventArgs e)
+        OpenFileDialog dlg = new OpenFileDialog();
+
+
+
+
+
+        private void Button_Click(object sender, RoutedEventArgs e)
         {
+            bool c = false;
+            if (txtFirstName.Text != "" && txtSecondName.Text != "" && txtNumber.Text != "" && txtCompany.Text != "" && txtAdres.Text != "" && txtEmail.Text != "" && txtPassw.Password != "" && img.Source != null)
+            {
+                foreach (var item in people)
+                {
+                    if (txtEmail.Text == item.Email)
+                    {
+                        c = true;
+                        MessageBox.Show("Даний емeйл уже використовується");
+                        break;
+                    }
+                }
+                if (c==false)
+                {
+                    people.Add(new Person(txtFirstName.Text, txtSecondName.Text, txtNumber.Text, dlg.FileName, txtCompany.Text, txtAdres.Text, txtEmail.Text, txtPassw.Password));
+                    txtAdres.Clear();
+                    txtCompany.Clear();
+                    txtEmail.Clear();
+                    txtFirstName.Clear();
+                    txtNumber.Clear();
+                    txtPassw.Clear();
+                    txtSecondName.Clear();
+                    img.Source = null;
+                    MessageBox.Show("Користувача додано");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Потрібно заповнити всі поля");
 
+            }
+        }
+       
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
             try
             {
-                OpenFileDialog dlg = new OpenFileDialog();
                 dlg.Title = "Select a picture";
-                dlg.Filter = "All supported graphics|*.jpg;*.jpeg;*.png|" +
-                  "JPEG (*.jpg;*.jpeg)|*.jpg;*.jpeg|" +
-                  "Portable Network Graphic (*.png)|*.png";
-
-                if   (dlg.ShowDialog()==true)
+                if (dlg.ShowDialog() == true)
                 {
                     img.Source = new BitmapImage(new Uri(dlg.FileName));
 
                 }
-
             }
             catch
             {
-                MessageBox.Show("asdas");
+                MessageBox.Show("Потрібно вибрати зображення");
 
             }
         }
 
-        private void BrdSiteLogo_MouseDown(object sender, MouseButtonEventArgs e)
+        private  void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-
+            XmlSerializer dcjs = new XmlSerializer(typeof(List<Person>));
+            FileStream fs = new FileStream("people.xml", FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            dcjs.Serialize(fs, people);
+            fs.Close();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void Canvas_Loaded(object sender, RoutedEventArgs e)
         {
-            people.Add(new Person(txtFirstName.Text, txtSecondName.Text, txtNumber.Text, img, txtCompany.Text, txtAdres.Text, txtEmail.Text, txtPassw.ToString()));
+         
+
+            try
+            {
+                XmlSerializer dcjs = new XmlSerializer(typeof(List<Person>));
+
+                using (FileStream fs = new FileStream("people.xml", FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                {
+                    List<Person> newpeople = (List<Person>)dcjs.Deserialize(fs);
+
+
+                    foreach (Person p in people)
+                    {
+                        people.Add(new Person(p.FirstName, p.SecondName, p.Number, p.PathImg, p.Company, p.Adress, p.Email, p.Passw));
+
+                    }
+                }
+                MessageBox.Show("OK");
+
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+
+            }
+
+        }
+        public void LogIn()
+        {
+            bool c = false;
+            foreach (var item in people)
+            {
+            if (window.Email==item.Email&&window.Passwd==item.Passw)
+                {
+                    c = true;
+                    txtFirstName.Text = item.FirstName;
+                    txtSecondName.Text = item.SecondName;
+
+                    txtNumber.Text = item.Number;
+                    dlg.FileName = item.PathImg;
+                    txtCompany.Text =  item.Company;
+                    txtAdres.Text = item.Adress;
+                    txtEmail.Text = item.Email;
+                    txtPassw.Password = item.Passw;
+                    img.Source = new BitmapImage(new Uri(item.PathImg));
+                    MessageBox.Show("OK");
+                    break;
+                }
+            }
+           // if(c==false)
+             //   window.ShowDialog();
+
+        }
+        private void Button_Click_2(object sender, RoutedEventArgs e)
+        {
+            window = null;
+            window = new Window1(this);
+            window.ShowDialog();
         }
     }
 }
