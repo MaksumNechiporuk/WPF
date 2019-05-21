@@ -21,6 +21,28 @@ namespace Login
         public MainWindow()
         {
             InitializeComponent();
+            this.Loaded += MainWindow_Loaded;
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                XmlSerializer dcjs = new XmlSerializer(typeof(List<Person>));
+
+                using (StreamReader fs = new StreamReader("people.xml"))
+                {
+                    people = (List<Person>)dcjs.Deserialize(fs);
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+               MessageBox.Show(ex.Message);
+
+            }
+
         }
 
         Window1 window;
@@ -80,7 +102,7 @@ namespace Login
             }
             catch
             {
-                MessageBox.Show("Потрібно вибрати зображення");
+           
 
             }
         }
@@ -91,36 +113,14 @@ namespace Login
             FileStream fs = new FileStream("people.xml", FileMode.OpenOrCreate, FileAccess.ReadWrite);
             dcjs.Serialize(fs, people);
             fs.Close();
+
         }
 
         private void Canvas_Loaded(object sender, RoutedEventArgs e)
         {
          
 
-            try
-            {
-                XmlSerializer dcjs = new XmlSerializer(typeof(List<Person>));
-
-                using (FileStream fs = new FileStream("people.xml", FileMode.OpenOrCreate, FileAccess.ReadWrite))
-                {
-                    List<Person> newpeople = (List<Person>)dcjs.Deserialize(fs);
-
-
-                    foreach (Person p in people)
-                    {
-                        people.Add(new Person(p.FirstName, p.SecondName, p.Number, p.PathImg, p.Company, p.Adress, p.Email, p.Passw));
-
-                    }
-                }
-                MessageBox.Show("OK");
-
-            }
-            catch(Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-
-            }
-
+            
         }
         public void LogIn()
         {

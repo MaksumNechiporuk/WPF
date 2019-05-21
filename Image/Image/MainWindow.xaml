@@ -1,0 +1,13 @@
+﻿<Window x:Class="Image.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Image"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <Canvas>
+        <Button x:Name="btnSelectedImage" Content="Виберіть фото" FontSize="20" Canvas.Left="308" Canvas.Top="168" Width="200" Height="69" Click="BtnSelectedImage_Click" />
+
+    </Canvas>
+</Window>
