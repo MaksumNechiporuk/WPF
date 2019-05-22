@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Data.SQLite;
 using System.Linq;
 using System.Text;
@@ -27,48 +28,180 @@ namespace SqlLite
         }
 
 
+        SQLiteConnection con = new SQLiteConnection($"Data Source={"Users.sqlite"}");
 
-        [SQLiteFunction(Name = "Sha1", Arguments = 1, FuncType = FunctionType.Scalar)]
-        public class Sha1 : SQLiteFunction
+
+
+        private void FillDataGrid()
         {
-            public override object Invoke(object[] args)
+            con.Open();
+
+            string q = "SELECT * From tblUsers";
+            DataSet dataSet = new DataSet();
+            SQLiteDataAdapter dataAdapter = new SQLiteDataAdapter(q, con);
+            dataAdapter.Fill(dataSet);
+            dgViewDB.ItemsSource = dataSet.Tables[0].DefaultView;
+            con.Close();
+
+        }
+        private void BtnAddNew_Click(object sender, RoutedEventArgs e)
+        {
+            if (txtLogin.Text != "" && txtPassword.Password != "")
             {
-                var buffer = args[0] as byte[];
+                con.Open();
+                string Login = txtLogin.Text;
+                string pass = txtPassword.Password;
+                string hashed = BCrypt.HashPassword(pass, BCrypt.GenerateSalt(12));
 
-                if (buffer == null)
-                {
-                    var s = args[0] as string;
+                string query = $"Insert into tblUsers(Login,Password) values('{Login}','{ hashed}')";
+                SQLiteCommand cmd = new SQLiteCommand(query, con);
+                cmd.ExecuteNonQuery();
+                con.Close();
+                FillDataGrid();
 
-                    if (s != null)
-                        buffer = Encoding.Unicode.GetBytes(s);
-                }
 
-                if (buffer == null)
-                    return null;
+            }
+            else
+                MessageBox.Show("Fill in all the fields");
+        }
 
-                using (var sha1 = System.Security.Cryptography.SHA1.Create())
-                {
-                    return sha1.ComputeHash(buffer);
-                }
+        private void BtnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                DataRowView d = dgViewDB.SelectedItem as DataRowView;
+
+                SQLiteCommand cmd;
+                con.Open();
+
+                string query = $"Delete FROM tblUsers where Login='{d["Login"].ToString()}'";
+                cmd = new SQLiteCommand(query, con);
+                cmd.ExecuteNonQuery();
+                con.Close();
+                FillDataGrid();
+            }
+            catch (Exception ex)
+            {
             }
         }
 
-        private void BtnAddNew_Click(object sender, RoutedEventArgs e)
+        private void DgViewDB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            string dbName = "Users.sqlite";
-            SQLiteConnection con = new SQLiteConnection($"Data Source={dbName}");
-            con.Open();
-            string Login = txtLogin.Text;
-            string pass = txtPassword.Text;
+            try
+            {
+                DataRowView d = dgViewDB.SelectedItem as DataRowView;
+                txtLogin.Text = d["Login"].ToString();
+                txtPassword.Password = d["Password"].ToString();
+            }
+            catch { }
+        }
+        private void BtnSignIn_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string Login = txtLogin.Text;
 
-            string query = $"Insert into Artists(Login) values('{Login}')";
+                string q = $"SELECT* FROM tblUsers WHERE Login = '{Login}'";
+                con.Open();
+                SQLiteCommand cmd;
 
-            SQLiteCommand cmd = new SQLiteCommand(query, con);
-             query = $"Insert into Artists(Password) values('{ pass}')";
-         
-            cmd.ExecuteNonQuery();
+                cmd = new SQLiteCommand(q, con);
+                SQLiteDataReader reader = cmd.ExecuteReader();
+
+                string pas = "";
+                if (reader.Read())
+                    pas = reader["Password"].ToString();
+                bool matches = BCrypt.CheckPassword(txtPassword.Password, pas);
+                if (matches)
+                    MessageBox.Show("OK");
+                else
+                    MessageBox.Show("wrong password or login");
+            }
+            catch
+            {
+                MessageBox.Show("user does not exist");
+
+            }
+
+
+
+
             con.Close();
-           // UpdateGrid();
+
+
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            FillDataGrid();
+
+        }
+
+
+
+        private void DgViewDB_RowEditEnding(object sender, DataGridRowEditEndingEventArgs e)
+        {
+
+            //   string query = $"Insert into tblUsers(Login,Password) values('{Login}','{ hashed}')";
+            //  SQLiteCommand cmd = new SQLiteCommand(query, con);
+            //  cmd.ExecuteNonQuery();
+
+            // FillDataGrid();
+
+        }
+
+        private void DgViewDB_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+
+        }
+
+        private void DgViewDB_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            // MessageBox.Show(e.NewValue.ToString());
+
+        }
+
+        private void DgViewDB_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+
+
+            if (dgViewDB.SelectedItems.Count > 0)
+            {
+                //DataRowView drv = (DataRowView)dgViewDB.SelectedItem;
+                //string id = drv.Row[0].ToString();
+
+                //con.Open();
+                //SQLiteCommand comm = new SQLiteCommand($"update tblUsers set Login={txtLogin.Text} where Id = @Id", con);
+                //comm.Parameters.AddWithValue("@id", id);
+                //comm.Parameters.AddWithValue("@Login", e.EditingElement);
+                //comm.Parameters.AddWithValue("@Password", txtPassword.Password);
+
+                //comm.ExecuteNonQuery();
+                //con.Close();
+
+                //FillDataGrid();
+                //try
+                //{
+
+                //    con.Open();
+                //    SQLiteCommand scmd = new SQLiteCommand("SELECT * FROM tblUsers");
+                //  //  dgViewDB.CommitEdit();
+
+                //    SQLiteDataAdapter sda = new SQLiteDataAdapter(scmd);
+                //    sda.UpdateCommand = new SQLiteCommand("SELECT * FROM tblUsers");
+                //  //  sda.Update(((DataView)dgViewDB.ItemsSource).Table);
+                //    DataTable dt = new DataTable("tblUsers");
+                //    SQLiteCommandBuilder builder = new SQLiteCommandBuilder(sda);
+                //    sda.UpdateCommand = builder.GetUpdateCommand();
+                //    sda.Update(dt);
+                //    con.Close();
+                //    MessageBox.Show("New entry is updated successfully");
+                //}
+                //catch (Exception ex)
+                //{
+                //    MessageBox.Show("You can't update empty row" + ex.Message);
+                //}
+            }
         }
     }
 }
