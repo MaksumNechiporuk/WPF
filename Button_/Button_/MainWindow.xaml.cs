@@ -26,44 +26,9 @@ namespace Button_
             InitializeComponent();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            double screeHeight = SystemParameters.FullPrimaryScreenHeight;
-            double screeWidth = SystemParameters.FullPrimaryScreenWidth;
-            MaxHeight = screeHeight;
-            MaxWidth = screeWidth;
-            OpenFileDialog dlg = new OpenFileDialog();
-            btnImage.MaxHeight = Height;
-            btnImage.MaxWidth = Width;
-
-            try
-            {
-                dlg.Title = "Select a picture";
-                if (dlg.ShowDialog() == true)
-                {
-                    img.Source = new BitmapImage(new Uri(dlg.FileName));
-                    btnImage.Height = 200;
-                    btnImage.Width = 300;
-
-                }
-            }
-            catch
-            {
-
-
-            }
-        }
+        
         bool c = false;
-        private void BtnImage_MouseEnter(object sender, MouseEventArgs e)
-        {
-
-            c = true;
-        }
-
-        private void BtnImage_MouseLeave(object sender, MouseEventArgs e)
-        {
-            c = false;
-        }
+    
 
     
 
@@ -97,11 +62,43 @@ namespace Button_
 
 
 
-        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+   
+
+        private void BtnImage_Click(object sender, RoutedEventArgs e)
         {
-            try {
-                btnImage.MaxHeight = Height-50;
-                btnImage.MaxWidth = Width-50;
+            
+            double screeHeight = SystemParameters.FullPrimaryScreenHeight;
+            double screeWidth = SystemParameters.FullPrimaryScreenWidth;
+            MaxHeight = screeHeight;
+            MaxWidth = screeWidth;
+            OpenFileDialog dlg = new OpenFileDialog();
+            btnImage.MaxHeight = Height;
+            btnImage.MaxWidth = Width;
+
+            try
+            {
+                dlg.Title = "Select a picture";
+                if (dlg.ShowDialog() == true)
+                {
+                    img.Source = new BitmapImage(new Uri(dlg.FileName));
+                    btnImage.Height = 200;
+                    btnImage.Width = 300;
+
+                }
+            }
+            catch
+            {
+
+
+            }
+        }
+
+        private void ImgWindow_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            try
+            {
+                btnImage.MaxHeight = Height - 50;
+                btnImage.MaxWidth = Width - 50;
                 MinHeight = btnImage.Height;
                 MinWidth = btnImage.Width;
 
@@ -109,8 +106,6 @@ namespace Button_
             catch
             {
             }
-            }
-
-        
+        }
     }
 }
