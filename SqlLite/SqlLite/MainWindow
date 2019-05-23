@@ -1,0 +1,31 @@
+﻿<Window x:Class="SqlLite.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SqlLite"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800" Loaded="Window_Loaded" >
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="88*"/>
+            <ColumnDefinition Width="5*"/>
+            <ColumnDefinition Width="303*"/>
+        </Grid.ColumnDefinitions>
+        <TextBox x:Name="txtLogin" HorizontalAlignment="Left" Height="23" Margin="80,35,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="120" Grid.ColumnSpan="3" IsEnabled="False" TextChanged="TxtLogin_TextChanged"/>
+        <PasswordBox x:Name="txtPassword" HorizontalAlignment="Left" Height="23" Margin="80,70,0,0"   VerticalAlignment="Top" Width="120" Grid.ColumnSpan="3" IsEnabled="False" PasswordChanged="TxtPassword_PasswordChanged"/>
+        <Label Content="Логін" HorizontalAlignment="Left" Margin="10,35,0,0" VerticalAlignment="Top"/>
+        <Label Content="Пароль" HorizontalAlignment="Left" Margin="10,70,0,0" VerticalAlignment="Top"/>
+        <DataGrid x:Name="dgViewDB" HorizontalAlignment="Left" Height="279" ItemsSource="{Binding}" IsSynchronizedWithCurrentItem="True" Grid.Row="0"  Margin="33,111,0,0" VerticalAlignment="Top" Width="735" SelectionChanged="DgViewDB_SelectionChanged" Grid.ColumnSpan="3"/>
+
+        <Button x:Name="btnAddNew" Content="Add new" HorizontalAlignment="Left" Margin="112.843,35,0,0" VerticalAlignment="Top" Width="75" Click="BtnAddNew_Click" Grid.Column="2"/>
+        <Button x:Name="btnSignIn" Content="Sign in" HorizontalAlignment="Left" Margin="112.843,70,0,0" VerticalAlignment="Top" Width="75" Click="BtnSignIn_Click" Grid.Column="2"/>
+        <Button x:Name="btnDelete" Content="Delete" HorizontalAlignment="Left" Margin="244,35,0,0" VerticalAlignment="Top" Width="75" Click="BtnDelete_Click" Grid.Column="2"/>
+        <Button  x:Name="btnUpdate" Content="Update" Grid.Column="2" HorizontalAlignment="Left" Margin="244,70,0,0" VerticalAlignment="Top" Width="75" Click="BtnUpdate_Click"/>
+        <Label x:Name="lblId" Content="" HorizontalAlignment="Left" Margin="55,4,0,0" VerticalAlignment="Top"/>
+        <Label Content="ID -" HorizontalAlignment="Left" Margin="20,4,0,0" VerticalAlignment="Top"/>
+        <Button x:Name="btnClear" Content="Clear txt" Grid.Column="2" HorizontalAlignment="Left" Margin="33,54,0,0" VerticalAlignment="Top" Width="75" Click="BtnClear_Click" IsEnabled="False"/>
+
+
+    </Grid>
+</Window>
