@@ -53,59 +53,10 @@ namespace Login
 
 
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            bool c = false;
-            if (txtFirstName.Text != "" && txtSecondName.Text != "" && txtNumber.Text != "" && txtCompany.Text != "" && txtAdres.Text != "" && txtEmail.Text != "" && txtPassw.Password != "" && img.Source != null)
-            {
-                foreach (var item in people)
-                {
-                    if (txtEmail.Text == item.Email)
-                    {
-                        c = true;
-                        MessageBox.Show("Даний емeйл уже використовується");
-                        break;
-                    }
-                }
-                if (c==false)
-                {
-                    people.Add(new Person(txtFirstName.Text, txtSecondName.Text, txtNumber.Text, dlg.FileName, txtCompany.Text, txtAdres.Text, txtEmail.Text, txtPassw.Password));
-                    txtAdres.Clear();
-                    txtCompany.Clear();
-                    txtEmail.Clear();
-                    txtFirstName.Clear();
-                    txtNumber.Clear();
-                    txtPassw.Clear();
-                    txtSecondName.Clear();
-                    img.Source = null;
-                    MessageBox.Show("Користувача додано");
-                }
-            }
-            else
-            {
-                MessageBox.Show("Потрібно заповнити всі поля");
-
-            }
-        }
+        
        
 
-        private void Button_Click_1(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                dlg.Title = "Select a picture";
-                if (dlg.ShowDialog() == true)
-                {
-                    img.Source = new BitmapImage(new Uri(dlg.FileName));
-
-                }
-            }
-            catch
-            {
-           
-
-            }
-        }
+       
 
         private  void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -116,15 +67,11 @@ namespace Login
 
         }
 
-        private void Canvas_Loaded(object sender, RoutedEventArgs e)
-        {
-         
-
-            
-        }
+       
+       public bool c;
         public void LogIn()
         {
-            bool c = false;
+             c = false;
             foreach (var item in people)
             {
             if (window.Email==item.Email&&window.Passwd==item.Passw)
@@ -144,15 +91,74 @@ namespace Login
                     break;
                 }
             }
-           // if(c==false)
-             //   window.ShowDialog();
+         if(c==false)
+            {
+                MessageBox.Show("Error");
+             
+                //window.ShowDialog();
+            }
 
         }
-        private void Button_Click_2(object sender, RoutedEventArgs e)
+   
+
+        private void BtnAddImg_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                dlg.Title = "Select a picture";
+                if (dlg.ShowDialog() == true)
+                {
+                    img.Source = new BitmapImage(new Uri(dlg.FileName));
+
+                }
+            }
+            catch
+            {
+
+
+            }
+        }
+
+        private void BtnLogIn_Click(object sender, RoutedEventArgs e)
         {
             window = null;
             window = new Window1(this);
             window.ShowDialog();
+        }
+
+        private void BtnAdd_Click(object sender, RoutedEventArgs e)
+        {
+            bool c = false;
+            if (txtFirstName.Text != "" && txtSecondName.Text != "" && txtNumber.Text != "" && txtCompany.Text != "" && txtAdres.Text != "" && txtEmail.Text != "" && txtPassw.Password != "" && img.Source != null)
+            {
+                foreach (var item in people)
+                {
+                    if (txtEmail.Text == item.Email)
+                    {
+                        c = true;
+                        MessageBox.Show("Даний емeйл уже використовується");
+                        break;
+                    }
+                }
+                if (c == false)
+                {
+                    people.Add(new Person(txtFirstName.Text, txtSecondName.Text, txtNumber.Text, dlg.FileName, txtCompany.Text, txtAdres.Text, txtEmail.Text, txtPassw.Password));
+                    txtAdres.Clear();
+                    txtCompany.Clear();
+                    txtEmail.Clear();
+                    txtFirstName.Clear();
+                    txtNumber.Clear();
+                    txtPassw.Clear();
+                    txtSecondName.Clear();
+                    img.Source = null;
+                    MessageBox.Show("Користувача додано");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Потрібно заповнити всі поля");
+
+            }
         }
     }
 }

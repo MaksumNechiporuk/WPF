@@ -31,12 +31,16 @@ namespace Login
         }
         public string Email { get; set; }
         public string Passwd { get; set; }
-        private void Button_Click(object sender, RoutedEventArgs e)
+
+        private void BtnLog_Click(object sender, RoutedEventArgs e)
         {
             Email = txtEmail.Text;
             Passwd = txtPasswd.Password;
             window.LogIn();
-            Close();
+            if (window.c == true)
+                Close();
         }
+
+       
     }
 }
