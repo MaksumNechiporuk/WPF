@@ -2,7 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:SqlLite"
-             StartupUri="MainWindow.xaml">
+             StartupUri="SQLiteWindow.xaml">
     <Application.Resources>
          
     </Application.Resources>

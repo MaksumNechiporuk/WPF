@@ -1,10 +1,12 @@
-﻿using Microsoft.Win32;
+﻿using Image.Help;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization.Json;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Xml.Serialization;
 
@@ -17,11 +19,14 @@ namespace Login
     {
 
         List<Person> people = new List<Person>();
-
+        string imageFolderSave = "Image";
+        string PathImagDic;
+        string CurImgUser;
         public MainWindow()
         {
             InitializeComponent();
             this.Loaded += MainWindow_Loaded;
+            PathImagDic = System.IO.Path.Combine(Directory.GetCurrentDirectory(), imageFolderSave);
         }
 
         private void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -37,27 +42,17 @@ namespace Login
                 }
 
             }
-            catch (Exception ex)
+            catch 
             {
-               MessageBox.Show(ex.Message);
+            
 
             }
 
         }
 
-        Window1 window;
+        LogWindow window;
 
-        OpenFileDialog dlg = new OpenFileDialog();
-
-
-
-
-
-        
-       
-
-       
-
+        OpenFileDialog dlg;
         private  void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             XmlSerializer dcjs = new XmlSerializer(typeof(List<Person>));
@@ -66,9 +61,8 @@ namespace Login
             fs.Close();
 
         }
-
-       
-       public bool c;
+        string ImgName;
+        public bool c;
         public void LogIn()
         {
              c = false;
@@ -81,12 +75,14 @@ namespace Login
                     txtSecondName.Text = item.SecondName;
 
                     txtNumber.Text = item.Number;
-                    dlg.FileName = item.PathImg;
+                 //   dlg.FileName = item.PathImg;
                     txtCompany.Text =  item.Company;
                     txtAdres.Text = item.Adress;
                     txtEmail.Text = item.Email;
                     txtPassw.Password = item.Passw;
-                    img.Source = new BitmapImage(new Uri(item.PathImg));
+                    ImgName = item.PathImg;
+                    img.Source = new BitmapImage(new Uri(Path.Combine(PathImagDic,  item.PathImg)));
+                    CurImgUser = (Path.Combine(PathImagDic, item.PathImg));
                     MessageBox.Show("OK");
                     break;
                 }
@@ -95,34 +91,49 @@ namespace Login
             {
                 MessageBox.Show("Error");
              
-                //window.ShowDialog();
             }
 
         }
-   
+
 
         private void BtnAddImg_Click(object sender, RoutedEventArgs e)
         {
-            try
+            dlg = new OpenFileDialog();
+            dlg.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) " +
+                "| *.jpg; *.jpeg; *.jpe; *.jfif; *.png";
+            if (dlg.ShowDialog() == true)
             {
-                dlg.Title = "Select a picture";
-                if (dlg.ShowDialog() == true)
+                img.Source = new BitmapImage(new Uri(dlg.FileName));
+                try
                 {
-                    img.Source = new BitmapImage(new Uri(dlg.FileName));
+                    
+                    var filePath = dlg.FileName;
+                    var image = System.Drawing.Image.FromFile(dlg.FileName);
+                    ImgName = Guid.NewGuid().ToString() + ".jpg";
+                    File.Copy(filePath,  System.IO.Path.Combine(Directory.GetCurrentDirectory() ,imageFolderSave,ImgName ));
+                    if (!Directory.Exists(imageFolderSave))
+                    {
+                        Directory.CreateDirectory(imageFolderSave);
+                    }
+                    var bmpOrigin = new System.Drawing.Bitmap(image);
+               
+                    var imageSave = ImageWorker.CreateImage(bmpOrigin, int.Parse((cmbSize.SelectedItem as ComboBoxItem).Content.ToString()), int.Parse((cmbSize.SelectedItem as ComboBoxItem).Content.ToString()));
+                    if (imageSave == null)
+                        throw new Exception("Проблема обробки фото");
 
+                    var imageSaveEnd = System.IO.Path.Combine(imageFolderSave, (cmbSize.SelectedItem as ComboBoxItem).Content.ToString()+"_"+ ImgName);
+                    imageSave.Save(imageSaveEnd, System.Drawing.Imaging.ImageFormat.Jpeg);
+                }
+               catch (Exception ex)
+                {
+                    MessageBox.Show($"Щось пішло не так {ex.Message}");
                 }
             }
-            catch
-            {
-
-
-            }
         }
-
         private void BtnLogIn_Click(object sender, RoutedEventArgs e)
         {
             window = null;
-            window = new Window1(this);
+            window = new LogWindow(this);
             window.ShowDialog();
         }
 
@@ -142,7 +153,7 @@ namespace Login
                 }
                 if (c == false)
                 {
-                    people.Add(new Person(txtFirstName.Text, txtSecondName.Text, txtNumber.Text, dlg.FileName, txtCompany.Text, txtAdres.Text, txtEmail.Text, txtPassw.Password));
+                    people.Add(new Person(txtFirstName.Text, txtSecondName.Text, txtNumber.Text, ImgName, txtCompany.Text, txtAdres.Text, txtEmail.Text, txtPassw.Password));
                     txtAdres.Clear();
                     txtCompany.Clear();
                     txtEmail.Clear();
@@ -158,6 +169,28 @@ namespace Login
             {
                 MessageBox.Show("Потрібно заповнити всі поля");
 
+            }
+        }
+
+        private void CmbSize_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+           try
+            {
+
+
+                var image = System.Drawing.Image.FromFile(CurImgUser);
+
+                var bmpOrigin = new System.Drawing.Bitmap(image);
+                var imageSave = ImageWorker.CreateImage(bmpOrigin, int.Parse((cmbSize.SelectedItem as ComboBoxItem).Content.ToString()), int.Parse((cmbSize.SelectedItem as ComboBoxItem).Content.ToString()));
+                if (imageSave == null)
+                    throw new Exception("Проблема обробки фото");
+
+                var imageSaveEnd = System.IO.Path.Combine(imageFolderSave, (cmbSize.SelectedItem as ComboBoxItem).Content.ToString() + "_" + ImgName);
+                imageSave.Save(imageSaveEnd, System.Drawing.Imaging.ImageFormat.Jpeg);
+            }
+            catch 
+            {
+               
             }
         }
     }

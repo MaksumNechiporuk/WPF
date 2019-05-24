@@ -50,10 +50,17 @@
 
         <Button x:Name="btnAdd" Content="Добавити користувача" Canvas.Left="23" Canvas.Top="257" Width="148" Click="BtnAdd_Click"/>
 
-        <Button  Canvas.Left="515" Canvas.Top="123" Width="120" Height="40">
-            <Button  x:Name="btnAddImg" Content="Загрузити фото" Width="120" Height="30" Click="BtnAddImg_Click"/>
-        </Button>
+       
+            <Button Canvas.Left="515" Canvas.Top="63"  x:Name="btnAddImg" Content="Загрузити фото" Width="120" Height="30" Click="BtnAddImg_Click"/>
+       
         <Button x:Name="btnLogIn" Content="Увійти" Canvas.Left="520" Canvas.Top="257" Width="115" Click="BtnLogIn_Click"/>
+        <ComboBox x:Name="cmbSize" Canvas.Left="515" Canvas.Top="169" Width="120" SelectedIndex="0" SelectionChanged="CmbSize_SelectionChanged">
+            <ComboBoxItem Content="50"/>
+            <ComboBoxItem Content="100"/>
+            <ComboBoxItem Content="300"/>
+            <ComboBoxItem Content="600"/>
+            <ComboBoxItem Content="1280"/>
+        </ComboBox>
 
 
     </Canvas>
