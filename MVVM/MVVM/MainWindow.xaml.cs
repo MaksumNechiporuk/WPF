@@ -1,6 +1,9 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.Entity;
+using System.Data.SQLite;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -22,11 +25,27 @@ namespace MVVM
     /// </summary>
     public partial class MainWindow : Window
     {
+      
+        SQLiteConnection con = new SQLiteConnection($"Data Source={"dbUsers.sqlite"}");
         public MainWindow()
         {
             InitializeComponent();
+            FillDataGrid();
+
         }
 
+        private void FillDataGrid()
+        {
+            con.Open();
+
+            string q = "SELECT * From tblUsers";
+            DataSet dataSet = new DataSet();
+            SQLiteDataAdapter dataAdapter = new SQLiteDataAdapter(q, con);
+            dataAdapter.Fill(dataSet);
+            dgViewDB.ItemsSource = dataSet.Tables[0].DefaultView;
+            con.Close();
+
+        }
         private void SldAge_ValueChanged(object sender, RoutedPropertyChangedEventArgs<double> e)
         {
             lblAge.Content = sldAge.Value;
@@ -34,6 +53,7 @@ namespace MVVM
 
         private void BtnAddImg_Click(object sender, RoutedEventArgs e)
         {
+
             string imageFolderSave = "Image";
             OpenFileDialog dlg = new OpenFileDialog();
             dlg.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) " +
@@ -60,5 +80,27 @@ namespace MVVM
                 }
             }
         }
+
+        private void BtnAdd_Click(object sender, RoutedEventArgs e)
+        {
+
+            con.Open();
+            string name = txtName.Text;
+            string age = sldAge.Value.ToString();
+
+            string query = $"Insert into tblUsers(Name,Age,DayOfBir,Img) values('{name}','{ age}','{ BDate}','{ img.Uid}')";
+            SQLiteCommand cmd = new SQLiteCommand(query, con);
+            cmd.ExecuteNonQuery();
+            con.Close();
+            FillDataGrid();
+        }
+    }
+
+    public class ApplicationContext : DbContext
+    {
+        public ApplicationContext() : base($"Data Source={"dbUsers.sqlite"}")
+        {
+        }
+        public DbSet<User> Users { get; set; }
     }
 }
