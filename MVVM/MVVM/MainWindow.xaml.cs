@@ -17,6 +17,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Globalization;
+
 
 namespace MVVM
 {
@@ -25,20 +27,21 @@ namespace MVVM
     /// </summary>
     public partial class MainWindow : Window
     {
-      
-        SQLiteConnection con = new SQLiteConnection($"Data Source={"dbUsers.sqlite"}");
+
+        SQLiteConnection con = new SQLiteConnection($"Data source={"dbUsers.sqlite"};DateTimeFormat=CurrentCulture;");
         public MainWindow()
         {
             InitializeComponent();
-            FillDataGrid();
 
+            FillDataGrid();
+            
         }
 
         private void FillDataGrid()
         {
             con.Open();
 
-            string q = "SELECT * From tblUsers";
+            string q = "SELECT Id, Name, Age,DayOfBir From tblUsers  ";
             DataSet dataSet = new DataSet();
             SQLiteDataAdapter dataAdapter = new SQLiteDataAdapter(q, con);
             dataAdapter.Fill(dataSet);
@@ -88,10 +91,11 @@ namespace MVVM
             string name = txtName.Text;
             string age = sldAge.Value.ToString();
 
-            string query = $"Insert into tblUsers(Name,Age,DayOfBir,Img) values('{name}','{ age}','{ BDate}','{ img.Uid}')";
+            string query = $"Insert into tblUsers(Name,Age,DayOfBir,Image) values('{name}','{ age}','{ BDate.SelectedDate}','{ img.Uid}')";
             SQLiteCommand cmd = new SQLiteCommand(query, con);
             cmd.ExecuteNonQuery();
             con.Close();
+            MessageBox.Show(BDate.SelectedDate.ToString());
             FillDataGrid();
         }
     }
