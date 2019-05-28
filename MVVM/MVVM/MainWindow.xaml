@@ -8,16 +8,16 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <TextBox x:Name="txtName" HorizontalAlignment="Left" Height="23" Margin="100,13,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="120"/>
-        <Slider x:Name="sldAge" HorizontalAlignment="Left" Margin="100,52,0,0" VerticalAlignment="Top" Width="159" Maximum="100" ValueChanged="SldAge_ValueChanged" SmallChange="{DynamicResource int}" IsSnapToTickEnabled="True"/>
         <Label x:Name="lblAge"  HorizontalAlignment="Left" Margin="264,52,0,0" VerticalAlignment="Top"/>
         <DatePicker x:Name="BDate" HorizontalAlignment="Left" Margin="319,90,0,0" VerticalAlignment="Top"/>
         <Label Content="Name" HorizontalAlignment="Left" Margin="25,10,0,0" VerticalAlignment="Top"/>
-        <Label Content="Age" HorizontalAlignment="Left" Margin="25,52,0,0" VerticalAlignment="Top"/>
         <Button x:Name="btnAddImg" Content="Add img" HorizontalAlignment="Left" Margin="319,50,0,0" VerticalAlignment="Top" Width="75" Click="BtnAddImg_Click"/>
         <Image x:Name="img" HorizontalAlignment="Left" Height="77" Margin="491,13,0,0" VerticalAlignment="Top" Width="93"/>
-        <DataGrid x:Name="dgViewDB" HorizontalAlignment="Left" Height="276" Margin="0,119,0,0" VerticalAlignment="Top" Width="782"/>
+        <DataGrid x:Name="dgViewDB" HorizontalAlignment="Left" Height="253" Margin="0,119,0,0" VerticalAlignment="Top" Width="782"/>
         <Button x:Name="btnAdd" Content="Add users" HorizontalAlignment="Left" Margin="608,42,0,0" VerticalAlignment="Top" Width="75" Click="BtnAdd_Click"/>
-
+        <StackPanel DockPanel.Dock="Top" Margin="0,377,0,0">
+            <WrapPanel x:Name="wpPaginationButtons" Height="416"/>
+        </StackPanel>
 
     </Grid>
 </Window>

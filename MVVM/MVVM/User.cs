@@ -9,34 +9,51 @@ namespace MVVM
 {
     public class User : INotifyPropertyChanged
     {
-        public string Name
+        int id;
+        string name;
+        public int Id
         {
-            get { return this.Name; }
+            get { return this.id; }
 
             set
             {
-                if (this.Name != value)
+                if (this.id != value)
                 {
-                    this.Name = value;
-                    this.NotifyPropertyChanged("Name");
-                }
-            }
-        } 
-       
-        public int Age {
-            get { return this.Age; }
-
-            set
-            {
-                if (this.Age != value)
-                {
-                    this.Age = value;
-                    this.NotifyPropertyChanged("Age");
+                    this.id = value;
+                    this.NotifyPropertyChanged("Id");
                 }
             }
         }
 
-        public DateTime date
+        public string Name
+        {
+            get { return this.name; }
+
+            set
+            {
+                if (this.name != value)
+                {
+                    this.name = value;
+                    this.NotifyPropertyChanged("Name");
+                }
+            }
+        }
+        int age;
+        public int Age
+        {
+            get { return this.age; }
+
+            set
+            {
+                if (this.age != value)
+                {
+                    this.age = value;
+                    this.NotifyPropertyChanged("Age");
+                }
+            }
+        }
+        DateTime date;
+        public DateTime Date
         {
             get { return this.date; }
 
@@ -49,15 +66,20 @@ namespace MVVM
                 }
             }
         }
+        public User()
+        {
+
+        }
+        string img;
         public string PathImg
         {
-            get { return this.PathImg; }
+            get { return this.img; }
 
             set
             {
-                if (this.PathImg != value)
+                if (this.img != value)
                 {
-                    this.PathImg = value;
+                    this.img = value;
                     this.NotifyPropertyChanged("PathImg");
                 }
             }
@@ -66,7 +88,7 @@ namespace MVVM
         {
             Name = n;
             Age = a;
-            date = d;
+            Date = d;
             PathImg = path;
         }
         public void NotifyPropertyChanged(string propName)
@@ -75,5 +97,7 @@ namespace MVVM
                 this.PropertyChanged(this, new PropertyChangedEventArgs(propName));
         }
         public event PropertyChangedEventHandler PropertyChanged;
+
+      
     }
 }
