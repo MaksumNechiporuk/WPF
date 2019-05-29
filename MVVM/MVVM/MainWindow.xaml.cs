@@ -39,11 +39,20 @@ namespace MVVM
         public MainWindow()
         {
             InitializeComponent();
+           // Generation();
             SearchUsers();
             GenerateButtonSimple(countPage);
-                //dgViewDB.ItemsSource = users;
+            //dgViewDB.ItemsSource = users;
             //  FillDataGrid();
 
+            
+
+
+        }
+
+        private void CurBtn_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            MessageBox.Show(":asd");
         }
 
         private void SearchUsers(string search = "")
@@ -63,18 +72,13 @@ namespace MVVM
             {
                 countUsersDB = int.Parse(reader["countUsers"].ToString());
             }
-            //  string q = "SELECT Id, Name, Age,DayOfBir From tblUsers  ";
 
             reader.Close();
-            //Запит до БД на вибірку інформації
             query = $"SELECT Id, Name, DayOfBir From tblUsers "+
                $"ORDER BY Id LIMIT {countItemPage} OFFSET {beginItem}";
-            //Створити клас для виконанян команди по підключенню до БД
             cmd.CommandText = query;// = new SQLiteCommand(query, con);
-            //Виконує команду і отримує об'єкт Reader для читання інформації з БД
             reader = cmd.ExecuteReader();
 
-            //-----------------
             while (reader.Read())
             {
                 int id = int.Parse(reader["Id"].ToString());
@@ -100,8 +104,8 @@ namespace MVVM
           
 
              countPage = countUsersDB / countItemPage;
-
-
+            countPage++;
+            //MessageBox.Show(countPage.ToString());
         }
         private void Generation()
         {
@@ -111,7 +115,7 @@ namespace MVVM
                 .RuleFor(o=>o.Date,f=>f.Date.Between(new DateTime(1950, 1, 1),  DateTime.Now))
                 .RuleFor(o=>o.PathImg,f=>f.Image.Locale);
 
-            var list = userFaker.Generate(5000);
+            var list = userFaker.Generate(100);
             foreach (var user in list)
             {
                 string nameGroup = user.Name;
@@ -127,10 +131,14 @@ namespace MVVM
         {
             wpPaginationButtons.Children.Clear();
             if(c==true)
-            for (int i = currentPage-5; i <= 4+ currentPage; i++)
+            for (int k=0, i = currentPage-5; k<10;k++, i++)
             {
-               
-                Button btn = new Button();
+                    if (i < 1 )
+                    {
+                        
+                        continue;
+                    }
+                    Button btn = new Button();
                 btn.Height = 25;
                 btn.Width = 40;
                 btn.Tag = i;
@@ -140,13 +148,13 @@ namespace MVVM
                 Pages.Add(i);
                 wpPaginationButtons.Children.Add(btn);
                 btn.Click += Btn_Click;
-                if (i == count)
-                    break;
-            }
+                    if (i == count)
+                        break;
+                }
            else  if(c==false)
             {
                 int j = currentPage-5;
-                for (int i = 5 + currentPage; i >= currentPage-5; i--)
+                for (int k=0, i = 3 + currentPage; k<11;k++, i--)
                 {
                     if (i < 1 ||j < 1)
                     {
@@ -170,7 +178,7 @@ namespace MVVM
         private void GenerateButtonSimple(int count)
         {
             wpPaginationButtons.Children.Clear();
-           
+       
                 for (int i = currentPage; i <= 9 + currentPage; i++)
                 {
 
@@ -183,7 +191,8 @@ namespace MVVM
                     btn.Margin = new Thickness(5, 5, 5, 5);
                     Pages.Add(i);
                     wpPaginationButtons.Children.Add(btn);
-                    btn.Click += Btn_Click;
+                btn.Background = Brushes.White;
+                btn.Click += Btn_Click;
                     if (i == count)
                         break;
                 }
@@ -193,7 +202,8 @@ namespace MVVM
         {
             Button btn = sender as Button;
             currentPage = int.Parse(btn.Tag.ToString());
-            SearchUsers();
+            btn.Background = Brushes.Blue;
+           
             if (currentPage == Pages[Pages.Count - 1] && countPage != currentPage)
             {
                 Pages.Clear();
@@ -205,7 +215,20 @@ namespace MVVM
                 Pages.Clear();
                 GenerateButton(countPage, false);
             }
+            SearchUsers();
+            foreach (var item in wpPaginationButtons.Children)
+            {
+                if (int.Parse((item as Button).Tag.ToString()) == currentPage)
+                {
+                    (item as Button).Background = Brushes.Yellow;
 
+                }
+                else
+                {
+                    (item as Button).Background = Brushes.White;
+
+                }
+            }
         }
 
         private void FillDataGrid()
@@ -262,8 +285,7 @@ namespace MVVM
             SQLiteCommand cmd = new SQLiteCommand(query, con);
             cmd.ExecuteNonQuery();
             con.Close();
-            MessageBox.Show(BDate.SelectedDate.ToString());
-            FillDataGrid();
+            SearchUsers();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)
