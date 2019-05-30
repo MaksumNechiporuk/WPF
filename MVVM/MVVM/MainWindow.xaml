@@ -15,7 +15,7 @@
             <DatePicker x:Name="BDate" HorizontalAlignment="Left" Margin="230,-25,0,0" SelectedDateChanged="BDate_SelectedDateChanged" />
             <Button x:Name="btnAddImg" Content="Add img" HorizontalAlignment="Left" Margin="340,-25,0,0" Width="75" Click="BtnAddImg_Click"/>
             <Image x:Name="img" HorizontalAlignment="Left" Height="77" Margin="430,-30,0,0" VerticalAlignment="Top" Width="93"/>
-            <Button x:Name="btnClick" Content="Search" Height="25" Margin="700,-70,0,0" VerticalAlignment="Top" Width="75" Click="BtnClick_Click" />
+            <Button x:Name="btnSearch" Content="Search" Height="25" Margin="700,-70,0,0" VerticalAlignment="Top" Width="75" Click="BtnSearch_Click" />
 
         </StackPanel>
         <StackPanel DockPanel.Dock="Bottom" Height="44" Margin="0,-60,0,0">

@@ -43,14 +43,13 @@ namespace MVVM
        //  Generation();
          SearchUsers();
             GenerateButtonSimple(countPage);
-           //dgViewDB.ItemsSource = users;
+
+            //dgViewDB.ItemsSource = users;
         }
         private void SearchUsers()
         {
             string searchName = txtName.Text;
-   
-           //  searchDate=new DateTime(BDate.SelectedDate.Value.Year);
-           //     searchDate = BDate.SelectedDate.Value;
+          
             int beginItem = countItemPage * (currentPage - 1);
             int countUsersDB = 0;
            
@@ -62,7 +61,7 @@ namespace MVVM
             {
                 query += $" WHERE Name LIKE '%{searchName}%'";
             }
-            if (searchDate!=null)
+            if (searchDate != null)
             {
                 query += $" WHERE Name LIKE '%{searchDate}%'";
             }
@@ -107,6 +106,7 @@ namespace MVVM
 
             countPage = countUsersDB / countItemPage;
             countPage++;
+           
         }
         private void Generation()
         {
@@ -284,20 +284,19 @@ namespace MVVM
             Generation();
         }
 
-        private void DgViewDB_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
 
-        }
-
-      
-        private void BtnClick_Click(object sender, RoutedEventArgs e)
-        {
-            SearchUsers();
-        }
+     
 
         private void BDate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
             searchDate = BDate.SelectedDate.Value;
+        }
+
+        private void BtnSearch_Click(object sender, RoutedEventArgs e)
+        {
+            SearchUsers();
+            GenerateButtonSimple(countPage);
+
         }
     }
 
