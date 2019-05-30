@@ -52,17 +52,16 @@ namespace MVVM
                 }
             }
         }
-        DateTime date;
-        public DateTime Date
+        private DateTime birthday;
+        public DateTime Birthday
         {
-            get { return this.date; }
-
+            get { return this.birthday; }
             set
             {
-                if (this.date != value)
+                if (this.birthday != value)
                 {
-                    this.date = value;
-                    this.NotifyPropertyChanged("date");
+                    this.birthday = value;
+                    this.NotifyPropertyChanged("Birthday");
                 }
             }
         }
@@ -88,16 +87,16 @@ namespace MVVM
         {
             Name = n;
             Age = a;
-            Date = d;
+            Birthday = d;
             PathImg = path;
         }
+        public event PropertyChangedEventHandler PropertyChanged;
+
         public void NotifyPropertyChanged(string propName)
         {
             if (this.PropertyChanged != null)
                 this.PropertyChanged(this, new PropertyChangedEventArgs(propName));
         }
-        public event PropertyChangedEventHandler PropertyChanged;
 
-      
     }
 }

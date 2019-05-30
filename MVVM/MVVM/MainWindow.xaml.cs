@@ -33,39 +33,39 @@ namespace MVVM
 
         ObservableCollection<User> users = new ObservableCollection<User>();
         int currentPage = 1;
+        DateTime searchDate;
         int countItemPage = 100;
-        SQLiteConnection con = new SQLiteConnection($"Data source={"dbUsers.sqlite"};version=3;new=False;datetimeformat=CurrentCulture");
+        SQLiteConnection con = new SQLiteConnection($"Data source={"dbUsers.sqlite"};datetimeformat=CurrentCulture");
         List<int> Pages = new List<int>();
         public MainWindow()
         {
             InitializeComponent();
-           // Generation();
-            SearchUsers();
+       //  Generation();
+         SearchUsers();
             GenerateButtonSimple(countPage);
-            //dgViewDB.ItemsSource = users;
-            //  FillDataGrid();
-
-            
-
-
+           //dgViewDB.ItemsSource = users;
         }
-
-        private void CurBtn_DataContextChanged(object sender, DependencyPropertyChangedEventArgs e)
+        private void SearchUsers()
         {
-            MessageBox.Show(":asd");
-        }
-
-        private void SearchUsers(string search = "")
-        {
-
+            string searchName = txtName.Text;
+   
+           //  searchDate=new DateTime(BDate.SelectedDate.Value.Year);
+           //     searchDate = BDate.SelectedDate.Value;
             int beginItem = countItemPage * (currentPage - 1);
             int countUsersDB = 0;
-            Stopwatch stopWatch = new Stopwatch();
-            stopWatch.Start();
+           
             users.Clear();
 
             con.Open();
             string query = "SELECT COUNT(*) as countUsers FROM tblUsers";
+            if (!string.IsNullOrEmpty(searchName))
+            {
+                query += $" WHERE Name LIKE '%{searchName}%'";
+            }
+            if (searchDate!=null)
+            {
+                query += $" WHERE Name LIKE '%{searchDate}%'";
+            }
             SQLiteCommand cmd = new SQLiteCommand(query, con);
             SQLiteDataReader reader = cmd.ExecuteReader();
             if (reader.Read())
@@ -74,9 +74,17 @@ namespace MVVM
             }
 
             reader.Close();
-            query = $"SELECT Id, Name, DayOfBir From tblUsers "+
-               $"ORDER BY Id LIMIT {countItemPage} OFFSET {beginItem}";
-            cmd.CommandText = query;// = new SQLiteCommand(query, con);
+            query = $"SELECT Id, Name, DayOfBir, Image From tblUsers ";
+            if (!string.IsNullOrEmpty(searchName))
+            {
+                query += $" WHERE Name LIKE '%{searchName}%'";
+            }
+            if (searchDate != null)
+            {
+                query += $" WHERE Name LIKE '%{searchDate}%'";
+            }
+            query += $"ORDER BY Id LIMIT {countItemPage} OFFSET {beginItem}";
+            cmd.CommandText = query;
             reader = cmd.ExecuteReader();
 
             while (reader.Read())
@@ -86,41 +94,35 @@ namespace MVVM
                 {
                     Id = id,
                     Name = reader["Name"].ToString(),
-                    Date = DateTime.Parse(reader["DayOfBir"].ToString(), new CultureInfo("ru-RU")),
-                    PathImg=img.Name
+                    Birthday = DateTime.Parse(reader["DayOfBir"].ToString(), new CultureInfo("ru-RU")),
+                    PathImg =  reader["Image"].ToString()
                 };
                 users.Add(user);
 
             }
             con.Close();
-            con.Open();
+            dgViewDB.ItemsSource = users;
 
-            
-            System.Data.DataSet dataSet = new System.Data.DataSet();
-            SQLiteDataAdapter dataAdapter = new SQLiteDataAdapter(query, con);
-            dataAdapter.Fill(dataSet);
-            dgViewDB.ItemsSource = dataSet.Tables[0].DefaultView;
-            con.Close();
           
 
-             countPage = countUsersDB / countItemPage;
+            countPage = countUsersDB / countItemPage;
             countPage++;
-            //MessageBox.Show(countPage.ToString());
         }
         private void Generation()
         {
             con.Open();
             var userFaker = new Faker<User>("uk")
                 .RuleFor(o => o.Name, f => f.Name.FirstName())
-                .RuleFor(o=>o.Date,f=>f.Date.Between(new DateTime(1950, 1, 1),  DateTime.Now))
-                .RuleFor(o=>o.PathImg,f=>f.Image.Locale);
-
-            var list = userFaker.Generate(100);
+                .RuleFor(o=>o.Birthday, f=>f.Date.Between(new DateTime(1950, 1, 1),  DateTime.Now))
+                .RuleFor(o=>o.PathImg,f=> f.Internet.Avatar());
+            //PicsumUrl()
+            var list = userFaker.Generate(2000);
+            MessageBox.Show(list[0].PathImg);
             foreach (var user in list)
             {
                 string nameGroup = user.Name;
           
-                string query = $"Insert into tblUsers(Name,DayOfBir,Img) values('{nameGroup}','{user.Date}','{user.PathImg}')";
+                string query = $"Insert into tblUsers(Name,DayOfBir,Image) values('{nameGroup}','{user.Birthday}','{user.PathImg}')";
                 SQLiteCommand cmd = new SQLiteCommand(query, con);
                 cmd.ExecuteNonQuery();
             }
@@ -131,12 +133,13 @@ namespace MVVM
         {
             wpPaginationButtons.Children.Clear();
             if(c==true)
-            for (int k=0, i = currentPage-5; k<10;k++, i++)
+            for (int k=0, i = currentPage-5; k<11;k++, i++)
             {
                     if (i < 1 )
                     {
-                        
+                        i = 0;
                         continue;
+
                     }
                     Button btn = new Button();
                 btn.Height = 25;
@@ -231,18 +234,7 @@ namespace MVVM
             }
         }
 
-        private void FillDataGrid()
-        {
-            con.Open();
-
-            string q = "SELECT Id, Name,DayOfBir From tblUsers  ";
-          System.Data.DataSet dataSet = new System.Data.DataSet();
-            SQLiteDataAdapter dataAdapter = new SQLiteDataAdapter(q, con);
-            dataAdapter.Fill(dataSet);
-            dgViewDB.ItemsSource = dataSet.Tables[0].DefaultView;
-            con.Close();
-
-        }
+      
     
 
         private void BtnAddImg_Click(object sender, RoutedEventArgs e)
@@ -274,7 +266,6 @@ namespace MVVM
                 }
             }
         }
-
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
 
@@ -292,13 +283,23 @@ namespace MVVM
         {
             Generation();
         }
+
+        private void DgViewDB_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+      
+        private void BtnClick_Click(object sender, RoutedEventArgs e)
+        {
+            SearchUsers();
+        }
+
+        private void BDate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            searchDate = BDate.SelectedDate.Value;
+        }
     }
 
-    public class ApplicationContext : DbContext
-    {
-        public ApplicationContext() : base($"Data Source={"dbUsers.sqlite"}")
-        {
-        }
-        public DbSet<User> Users { get; set; }
-    }
+   
 }

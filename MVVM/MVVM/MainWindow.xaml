@@ -5,19 +5,71 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:MVVM"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        <TextBox x:Name="txtName" HorizontalAlignment="Left" Height="23" Margin="100,13,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="120"/>
-        <Label x:Name="lblAge"  HorizontalAlignment="Left" Margin="264,52,0,0" VerticalAlignment="Top"/>
-        <DatePicker x:Name="BDate" HorizontalAlignment="Left" Margin="319,90,0,0" VerticalAlignment="Top"/>
-        <Label Content="Name" HorizontalAlignment="Left" Margin="25,10,0,0" VerticalAlignment="Top"/>
-        <Button x:Name="btnAddImg" Content="Add img" HorizontalAlignment="Left" Margin="319,50,0,0" VerticalAlignment="Top" Width="75" Click="BtnAddImg_Click"/>
-        <Image x:Name="img" HorizontalAlignment="Left" Height="77" Margin="491,13,0,0" VerticalAlignment="Top" Width="93"/>
-        <DataGrid x:Name="dgViewDB" HorizontalAlignment="Left" Height="253" Margin="0,119,0,0" VerticalAlignment="Top" Width="782"/>
-        <Button x:Name="btnAdd" Content="Add users" HorizontalAlignment="Left" Margin="608,42,0,0" VerticalAlignment="Top" Width="75" Click="BtnAdd_Click"/>
-        <StackPanel DockPanel.Dock="Top" Margin="0,377,0,0">
-            <WrapPanel x:Name="wpPaginationButtons" Height="416"/>
-        </StackPanel>
+        Title="MainWindow" Height="450" Width="804">
+    <DockPanel >
+       
+        <StackPanel DockPanel.Dock="Top" Margin="0,0,0,350" Height="108">
+            <TextBox x:Name="txtName" HorizontalAlignment="Left" Height="23" Margin="100,13,0,0" TextWrapping="Wrap"  Width="120"/>
+            <Button x:Name="btnAdd" Content="Add users" HorizontalAlignment="Left" Margin="608,-25,0,0"  Width="75" Click="BtnAdd_Click"/>
+            <Label Content="Name" HorizontalAlignment="Left" Margin="30,-25,0,0"/>
+            <DatePicker x:Name="BDate" HorizontalAlignment="Left" Margin="230,-25,0,0" SelectedDateChanged="BDate_SelectedDateChanged" />
+            <Button x:Name="btnAddImg" Content="Add img" HorizontalAlignment="Left" Margin="340,-25,0,0" Width="75" Click="BtnAddImg_Click"/>
+            <Image x:Name="img" HorizontalAlignment="Left" Height="77" Margin="430,-30,0,0" VerticalAlignment="Top" Width="93"/>
+            <Button x:Name="btnClick" Content="Search" Height="25" Margin="700,-70,0,0" VerticalAlignment="Top" Width="75" Click="BtnClick_Click" />
 
-    </Grid>
+        </StackPanel>
+        <StackPanel DockPanel.Dock="Bottom" Height="44" Margin="0,-60,0,0">
+            <WrapPanel x:Name="wpPaginationButtons">
+            </WrapPanel>
+        </StackPanel>
+        <DataGrid x:Name="dgViewDB" Height="253" Margin="0,-800,0,-372" AutoGenerateColumns="False"  Width="790">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ID" Binding="{Binding Id}" />
+
+                <DataGridTextColumn Header="Назва" Binding="{Binding Name}" />
+                <DataGridTemplateColumn Header="Дата народження">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <DatePicker SelectedDate="{Binding Birthday}" BorderThickness="0" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+            <DataGrid.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform/>
+                    <SkewTransform AngleX="-0.292"/>
+                    <RotateTransform/>
+                    <TranslateTransform X="-1.069"/>
+                </TransformGroup>
+            </DataGrid.RenderTransform>
+               
+            <DataGrid.RowDetailsTemplate>
+                <DataTemplate>
+                    <DockPanel Background="GhostWhite">
+                        <Image DockPanel.Dock="Left" Source="{Binding PathImg}" Height="64" Margin="10" />
+                        <Grid Margin="0,10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <TextBlock Text="ID: " FontWeight="Bold" />
+                            <TextBlock Text="{Binding Id}" Grid.Column="1" />
+                            <TextBlock Text="Name: " FontWeight="Bold" Grid.Row="1" />
+                            <TextBlock Text="{Binding Name}" Grid.Column="1" Grid.Row="1" />
+                            <TextBlock Text="Birthday: " FontWeight="Bold" Grid.Row="2" />
+                            <TextBlock Text="{Binding Birthday, StringFormat=d}" Grid.Column="1" Grid.Row="2" />
+
+                        </Grid>
+                    </DockPanel>
+                </DataTemplate>
+            </DataGrid.RowDetailsTemplate>
+        </DataGrid>
+    </DockPanel>
 </Window>
