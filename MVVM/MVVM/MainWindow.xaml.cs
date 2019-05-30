@@ -40,28 +40,29 @@ namespace MVVM
         public MainWindow()
         {
             InitializeComponent();
-       //  Generation();
-         SearchUsers();
+            //  Generation();
+            searchDate.;
+            SearchUsers();
             GenerateButtonSimple(countPage);
-
-            //dgViewDB.ItemsSource = users;
         }
         private void SearchUsers()
         {
             string searchName = txtName.Text;
-          
+            bool c = false;            
+            if (searchDate==null)
+            {
+                c = true;
+            }          
             int beginItem = countItemPage * (currentPage - 1);
             int countUsersDB = 0;
-           
             users.Clear();
-
             con.Open();
             string query = "SELECT COUNT(*) as countUsers FROM tblUsers";
             if (!string.IsNullOrEmpty(searchName))
             {
                 query += $" WHERE Name LIKE '%{searchName}%'";
             }
-            if (searchDate != null)
+            if (c==false)
             {
                 query += $" WHERE Name LIKE '%{searchDate}%'";
             }
@@ -71,21 +72,19 @@ namespace MVVM
             {
                 countUsersDB = int.Parse(reader["countUsers"].ToString());
             }
-
             reader.Close();
             query = $"SELECT Id, Name, DayOfBir, Image From tblUsers ";
             if (!string.IsNullOrEmpty(searchName))
             {
                 query += $" WHERE Name LIKE '%{searchName}%'";
             }
-            if (searchDate != null)
+            if (c==false)
             {
                 query += $" WHERE Name LIKE '%{searchDate}%'";
             }
             query += $"ORDER BY Id LIMIT {countItemPage} OFFSET {beginItem}";
             cmd.CommandText = query;
             reader = cmd.ExecuteReader();
-
             while (reader.Read())
             {
                 int id = int.Parse(reader["Id"].ToString());
@@ -97,16 +96,11 @@ namespace MVVM
                     PathImg =  reader["Image"].ToString()
                 };
                 users.Add(user);
-
             }
             con.Close();
             dgViewDB.ItemsSource = users;
-
-          
-
             countPage = countUsersDB / countItemPage;
-            countPage++;
-           
+            countPage++;        
         }
         private void Generation()
         {
@@ -272,20 +266,12 @@ namespace MVVM
             con.Open();
             string name = txtName.Text;
 
-            string query = $"Insert into tblUsers(Name,DayOfBir,Img) values('{name}','{ BDate.SelectedDate}','{ img.Name}')";
+            string query = $"Insert into tblUsers(Name,DayOfBir,Image) values('{name}','{ BDate.SelectedDate}','{ img.Name}')";
             SQLiteCommand cmd = new SQLiteCommand(query, con);
             cmd.ExecuteNonQuery();
             con.Close();
             SearchUsers();
         }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            Generation();
-        }
-
-
-     
 
         private void BDate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
