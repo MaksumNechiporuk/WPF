@@ -41,15 +41,16 @@ namespace MVVM
         {
             InitializeComponent();
             //  Generation();
-            searchDate.;
+           // searchDate.;
             SearchUsers();
             GenerateButtonSimple(countPage);
         }
         private void SearchUsers()
         {
             string searchName = txtName.Text;
-            bool c = false;            
-            if (searchDate==null)
+            bool c = false;
+          //  BDate.
+            if (BDate.SelectedDate.Value==null)
             {
                 c = true;
             }          
