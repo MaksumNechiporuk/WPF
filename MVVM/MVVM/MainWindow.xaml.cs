@@ -37,23 +37,24 @@ namespace MVVM
         int countItemPage = 100;
         SQLiteConnection con = new SQLiteConnection($"Data source={"dbUsers.sqlite"};datetimeformat=CurrentCulture");
         List<int> Pages = new List<int>();
+        bool c = false;
         public MainWindow()
         {
             InitializeComponent();
-            //  Generation();
+           //   Generation();
            // searchDate.;
             SearchUsers();
-            GenerateButtonSimple(countPage);
+           GenerateButtonSimple(countPage);
         }
         private void SearchUsers()
         {
             string searchName = txtName.Text;
-            bool c = false;
+     
           //  BDate.
-            if (BDate.SelectedDate.Value==null)
-            {
-                c = true;
-            }          
+            //if (BDate.SelectedDate.Value==null)
+            //{
+            //    c = true;
+            //}          
             int beginItem = countItemPage * (currentPage - 1);
             int countUsersDB = 0;
             users.Clear();
@@ -63,7 +64,7 @@ namespace MVVM
             {
                 query += $" WHERE Name LIKE '%{searchName}%'";
             }
-            if (c==false)
+            if (c== true)
             {
                 query += $" WHERE Name LIKE '%{searchDate}%'";
             }
@@ -79,9 +80,9 @@ namespace MVVM
             {
                 query += $" WHERE Name LIKE '%{searchName}%'";
             }
-            if (c==false)
+            if (c== true)
             {
-                query += $" WHERE Name LIKE '%{searchDate}%'";
+                query += $" WHERE DayOfBir LIKE '%{searchDate}%'";
             }
             query += $"ORDER BY Id LIMIT {countItemPage} OFFSET {beginItem}";
             cmd.CommandText = query;
@@ -96,12 +97,15 @@ namespace MVVM
                     Birthday = DateTime.Parse(reader["DayOfBir"].ToString(), new CultureInfo("ru-RU")),
                     PathImg =  reader["Image"].ToString()
                 };
+                user.Birthday=DateTime.Parse (user.Birthday.ToShortDateString(), new CultureInfo("ru-RU"));
                 users.Add(user);
             }
+           // MessageBox.Show(users[0].Birthday.ToString());
             con.Close();
             dgViewDB.ItemsSource = users;
             countPage = countUsersDB / countItemPage;
-            countPage++;        
+            countPage++;
+            c = false;
         }
         private void Generation()
         {
@@ -111,13 +115,13 @@ namespace MVVM
                 .RuleFor(o=>o.Birthday, f=>f.Date.Between(new DateTime(1950, 1, 1),  DateTime.Now))
                 .RuleFor(o=>o.PathImg,f=> f.Internet.Avatar());
             //PicsumUrl()
-            var list = userFaker.Generate(2000);
-            MessageBox.Show(list[0].PathImg);
+            var list = userFaker.Generate(200);
             foreach (var user in list)
             {
-                string nameGroup = user.Name;
-          
-                string query = $"Insert into tblUsers(Name,DayOfBir,Image) values('{nameGroup}','{user.Birthday}','{user.PathImg}')";
+                string name = user.Name;
+                DateTime date= DateTime.Parse(user.Birthday.ToShortDateString(), new CultureInfo("ru-RU"));
+
+                string query = $"Insert into tblUsers(Name,DayOfBir,Image) values('{name}','{date}','{user.PathImg}')";
                 SQLiteCommand cmd = new SQLiteCommand(query, con);
                 cmd.ExecuteNonQuery();
             }
@@ -277,6 +281,7 @@ namespace MVVM
         private void BDate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
             searchDate = BDate.SelectedDate.Value;
+            c = true;
         }
 
         private void BtnSearch_Click(object sender, RoutedEventArgs e)
@@ -284,6 +289,12 @@ namespace MVVM
             SearchUsers();
             GenerateButtonSimple(countPage);
 
+        }
+
+        private void BtnShow_Click(object sender, RoutedEventArgs e)
+        {
+            SearchUsers();
+            GenerateButtonSimple(countPage);
         }
     }
 
