@@ -30,6 +30,11 @@ namespace MVVM
     public partial class MainWindow : Window
     {
         int countPage=0;
+        string ImgName;
+        string imageFolderSave = "Image";
+        string PathImagDic;
+        DataRowView d;
+
 
         ObservableCollection<User> users = new ObservableCollection<User>();
         int currentPage = 1;
@@ -41,20 +46,18 @@ namespace MVVM
         public MainWindow()
         {
             InitializeComponent();
-           //   Generation();
-           // searchDate.;
+            //   Generation();
+            PathImagDic = System.IO.Path.Combine(Directory.GetCurrentDirectory(), imageFolderSave);
+
             SearchUsers();
            GenerateButtonSimple(countPage);
+            MessageBox.Show(PathImagDic);
         }
         private void SearchUsers()
         {
             string searchName = txtName.Text;
      
-          //  BDate.
-            //if (BDate.SelectedDate.Value==null)
-            //{
-            //    c = true;
-            //}          
+         
             int beginItem = countItemPage * (currentPage - 1);
             int countUsersDB = 0;
             users.Clear();
@@ -76,6 +79,8 @@ namespace MVVM
             }
             reader.Close();
             query = $"SELECT Id, Name, DayOfBir, Image From tblUsers ";
+          //  query += $" WHERE Image LIKE '%http%'";
+
             if (!string.IsNullOrEmpty(searchName))
             {
                 query += $" WHERE Name LIKE '%{searchName}%'";
@@ -87,6 +92,29 @@ namespace MVVM
             query += $"ORDER BY Id LIMIT {countItemPage} OFFSET {beginItem}";
             cmd.CommandText = query;
             reader = cmd.ExecuteReader();
+           try
+            {
+
+                ImageFromEthernet(reader);
+                reader.Close();
+                cmd.CommandText = query;
+                query = $"SELECT Id, Name, DayOfBir, Image From tblUsers ";
+                query += " WHERE Image  NOT LIKE   '%/%' ";
+               reader = cmd.ExecuteReader();
+                ImageFromDirectory(reader);
+            }
+           catch { }
+            con.Close();
+            dgViewDB.ItemsSource = users;
+            countPage = countUsersDB / countItemPage;
+            countPage++;
+            c = false;
+        }
+        void ImageFromDirectory(SQLiteDataReader reader)
+        {
+               // MessageBox.Show(System.IO.Path.Combine(PathImagDic, ImgName));
+            string []imageNames=Directory.GetFiles(PathImagDic);
+            int i = 0;
             while (reader.Read())
             {
                 int id = int.Parse(reader["Id"].ToString());
@@ -95,17 +123,33 @@ namespace MVVM
                     Id = id,
                     Name = reader["Name"].ToString(),
                     Birthday = DateTime.Parse(reader["DayOfBir"].ToString(), new CultureInfo("ru-RU")),
-                    PathImg =  reader["Image"].ToString()
                 };
-                user.Birthday=DateTime.Parse (user.Birthday.ToShortDateString(), new CultureInfo("ru-RU"));
+                user.Birthday = DateTime.Parse(user.Birthday.ToShortDateString(), new CultureInfo("ru-RU"));
                 users.Add(user);
             }
-           // MessageBox.Show(users[0].Birthday.ToString());
-            con.Close();
-            dgViewDB.ItemsSource = users;
-            countPage = countUsersDB / countItemPage;
-            countPage++;
-            c = false;
+            foreach (var item in users)
+            {
+                item.PathImg = System.IO.Path.Combine(PathImagDic, imageNames[i]);
+
+            i++;
+            }
+        }
+        void ImageFromEthernet(SQLiteDataReader reader)
+        {
+            while (reader.Read())
+            {
+                int id = int.Parse(reader["Id"].ToString());
+                User user = new User
+                {
+                    Id = id,
+                    Name = reader["Name"].ToString(),
+                    Birthday = DateTime.Parse(reader["DayOfBir"].ToString(), new CultureInfo("ru-RU")),
+                    PathImg = reader["Image"].ToString()
+                };
+                user.Birthday = DateTime.Parse(user.Birthday.ToShortDateString(), new CultureInfo("ru-RU"));
+                users.Add(user);
+            }
+           // MessageBox.Show(users[0].PathImg);
         }
         private void Generation()
         {
@@ -243,6 +287,7 @@ namespace MVVM
             OpenFileDialog dlg = new OpenFileDialog();
             dlg.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) " +
                 "| *.jpg; *.jpeg; *.jpe; *.jfif; *.png";
+
             if (dlg.ShowDialog() == true)
             {
                 img.Source = new BitmapImage(new Uri(dlg.FileName));
@@ -250,14 +295,14 @@ namespace MVVM
                 {
                     var filePath = dlg.FileName;
                     var image = System.Drawing.Image.FromFile(dlg.FileName);
-                    string   ImgName = Guid.NewGuid().ToString() + ".jpg";
+                       ImgName = Guid.NewGuid().ToString() + ".jpg";
                     File.Copy(filePath, System.IO.Path.Combine(imageFolderSave, ImgName));
                     if (!Directory.Exists(imageFolderSave))
                     {
                         Directory.CreateDirectory(imageFolderSave);
                     }
                     var bmpOrigin = new System.Drawing.Bitmap(image);
-
+                   // ImgName= dlg.SafeFileName ;
                 }
                 catch (Exception ex)
                 {
@@ -271,10 +316,12 @@ namespace MVVM
             con.Open();
             string name = txtName.Text;
 
-            string query = $"Insert into tblUsers(Name,DayOfBir,Image) values('{name}','{ BDate.SelectedDate}','{ img.Name}')";
+            string query = $"Insert into tblUsers(Name,DayOfBir,Image) values('{name}','{ BDate.SelectedDate}','{ ImgName}')";
             SQLiteCommand cmd = new SQLiteCommand(query, con);
             cmd.ExecuteNonQuery();
             con.Close();
+      
+            c = false;
             SearchUsers();
         }
 
@@ -288,6 +335,9 @@ namespace MVVM
         {
             SearchUsers();
             GenerateButtonSimple(countPage);
+            btnShow.IsEnabled = true;
+         //   BDate.ClearValue();
+
 
         }
 
@@ -295,6 +345,38 @@ namespace MVVM
         {
             SearchUsers();
             GenerateButtonSimple(countPage);
+            btnShow.IsEnabled = false;
+
+        }
+
+        private void EditMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void DeleteMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+         //   try
+            {
+               d = dgViewDB.Items[a] as DataRowView;
+                SQLiteCommand cmd;
+                con.Open();  
+                string query = $"Delete FROM tblUsers where Name='{d["Name"].ToString()}'";
+                cmd = new SQLiteCommand(query, con);
+                cmd.ExecuteNonQuery();
+                con.Close();
+                SearchUsers();
+            }
+           // catch
+            {
+            }
+        }
+        int a;
+        private void DgViewDB_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+         a = dgViewDB.SelectedIndex;
+          //  MessageBox.Show("asd");
+                
         }
     }
 

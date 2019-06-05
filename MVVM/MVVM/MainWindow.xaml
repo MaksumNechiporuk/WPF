@@ -16,18 +16,25 @@
             <Button x:Name="btnAddImg" Content="Add img" HorizontalAlignment="Left" Margin="340,-25,0,0" Width="75" Click="BtnAddImg_Click"/>
             <Image x:Name="img" HorizontalAlignment="Left" Height="77" Margin="430,-30,0,0" VerticalAlignment="Top" Width="93"/>
             <Button x:Name="btnSearch" Content="Search" Height="25" Margin="700,-80,0,0" VerticalAlignment="Top" Width="75" Click="BtnSearch_Click" />
-            <Button x:Name="btnShow" Content="Button" Height="25"  Margin="700,-70,0,0" Click="BtnShow_Click"/>
+            <Button x:Name="btnShow" Content="Show all" Height="25" Width="70"  Margin="700,-70,0,0" Click="BtnShow_Click" IsEnabled="False"/>
 
         </StackPanel>
         <StackPanel DockPanel.Dock="Bottom" Height="44" Margin="0,-60,0,0">
             <WrapPanel x:Name="wpPaginationButtons">
             </WrapPanel>
         </StackPanel>
-        <DataGrid x:Name="dgViewDB" Height="253" Margin="0,-800,0,-372" AutoGenerateColumns="False"  Width="790">
+        <DataGrid x:Name="dgViewDB" Height="253" Margin="0,-800,0,-372" AutoGenerateColumns="False"   Width="790" SelectionChanged="DgViewDB_SelectionChanged">
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Edit login" x:Name="EditMenuItem" Click="EditMenuItem_Click" />
+                    <MenuItem Header="Delete" x:Name="DeleteMenuItem" Click="DeleteMenuItem_Click"/>
+
+                </ContextMenu>
+            </DataGrid.ContextMenu>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="ID" Binding="{Binding Id}" />
 
-                <DataGridTextColumn Header="Назва" Binding="{Binding Name}" />
+                <DataGridTextColumn x:Name="nameUser" Header="Назва" Binding="{Binding Name}" />
                 <DataGridTemplateColumn Header="Дата народження">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>

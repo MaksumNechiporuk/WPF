@@ -75,7 +75,6 @@ namespace Login
                     txtSecondName.Text = item.SecondName;
 
                     txtNumber.Text = item.Number;
-                 //   dlg.FileName = item.PathImg;
                     txtCompany.Text =  item.Company;
                     txtAdres.Text = item.Adress;
                     txtEmail.Text = item.Email;
