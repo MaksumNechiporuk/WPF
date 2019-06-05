@@ -64,9 +64,12 @@ namespace MVVM
             con.Open();
 
 
-
-
             string query = "SELECT COUNT(*) as countUsers FROM tblUsers";
+           
+            SQLiteCommand cmd = new SQLiteCommand(query, con);
+            SQLiteDataReader reader = cmd.ExecuteReader();
+            
+
             if (!string.IsNullOrEmpty(searchName))
             {
                 query += $" WHERE Name LIKE '%{searchName}%'";
@@ -75,39 +78,43 @@ namespace MVVM
             {
                 query += $" WHERE Name LIKE '%{searchDate}%'";
             }
-            SQLiteCommand cmd = new SQLiteCommand(query, con);
-            SQLiteDataReader reader = cmd.ExecuteReader();
+             cmd = new SQLiteCommand(query, con);
+             reader = cmd.ExecuteReader();
             if (reader.Read())
             {
                 countUsersDB = int.Parse(reader["countUsers"].ToString());
             }
             reader.Close();
-            query = $"SELECT Id, Name, DayOfBir, Image From tblUsers ";
-            query += $" WHERE Image LIKE '%http%' ";
-
-            if (!string.IsNullOrEmpty(searchName))
-            {
-                query += $" AND  Name LIKE '%{searchName}%' ";
-            }
-            if (c == true)
-            {
-                query += $" AND WHERE DayOfBir LIKE '%{searchDate}%' ";
-            }
-           query += $"  ORDER BY Id LIMIT {countItemPage} OFFSET {beginItem}";
-            cmd.CommandText = query;
-            reader = cmd.ExecuteReader();
+           
           // try
             {
 
-                ImageFromEthernet(reader);
-                reader.Close();
                 query = $"  SELECT Id, Name, DayOfBir, Image From tblUsers ";
-                query += $" WHERE Image  NOT LIKE '%http%' AND  {beginItem}  <= Id ";
-               // query += $"ORDER BY Id LIMIT {countItemPage} OFFSET {beginItem}";
+                query += $" WHERE Image  NOT LIKE '%http%' AND   {beginItem}  <= Id  AND  {beginItem+ countItemPage}  >= Id ";
                 cmd.CommandText = query;
 
                 reader = cmd.ExecuteReader();
                 ImageFromDirectory(reader);
+                reader.Close();
+
+                query = $"SELECT Id, Name, DayOfBir, Image From tblUsers ";
+                query += $" WHERE Image LIKE '%http%' ";
+
+                if (!string.IsNullOrEmpty(searchName))
+                {
+                    query += $" AND  Name LIKE '%{searchName}%' ";
+                }
+                if (c == true)
+                {
+                    query += $" AND WHERE DayOfBir LIKE '%{searchDate}%' ";
+                }
+                query += $"  ORDER BY Id LIMIT {countItemPage} OFFSET {beginItem}";
+                cmd.CommandText = query;
+                reader = cmd.ExecuteReader();
+
+                ImageFromEthernet(reader);
+                reader.Close();
+
             }
 
           // catch { }
@@ -375,27 +382,80 @@ namespace MVVM
 
         private void DeleteMenuItem_Click(object sender, RoutedEventArgs e)
         {
-         //   try
+              try
             {
-               d = dgViewDB.Items.CurrentItem as DataRowView;
-                SQLiteCommand cmd;
-                con.Open();  
-                string query = $"Delete FROM tblUsers where Name='{d["Name"].ToString()}'";
-                cmd = new SQLiteCommand(query, con);
-                cmd.ExecuteNonQuery();
-                con.Close();
-                SearchUsers();
+                if (dgViewDB.SelectedItem != null)
+                {
+                    int ind = 0;
+                    ind = users.IndexOf(dgViewDB.SelectedItem as User);
+                    
+
+                    SQLiteCommand cmd;
+                    con.Open();
+                    string query = $"Delete FROM tblUsers where Name='{users[ind].Name}'";
+                    cmd = new SQLiteCommand(query, con);
+                    cmd.ExecuteNonQuery();
+                    con.Close();
+                    users.RemoveAt(ind);
+                    SearchUsers();
+                }
             }
-           // catch
+            catch
             {
             }
         }
-        int a;
         private void DgViewDB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-         a = dgViewDB.SelectedIndex;
-          //  MessageBox.Show("asd");
                 
+        }
+
+        private void UserImage_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            string imageFolderSave = "Image";
+            Image image = sender as Image;
+            OpenFileDialog dlg = new OpenFileDialog();
+            dlg.Filter = "Image files (*.jpg, *.jpeg, *.jpe, *.jfif, *.png) " +
+                "| *.jpg; *.jpeg; *.jpe; *.jfif; *.png";
+
+            if (dlg.ShowDialog() == true)
+            {
+
+                image.Source = new BitmapImage(new Uri(dlg.FileName));
+                try
+                {
+                    var filePath = dlg.FileName;
+                    var img = System.Drawing.Image.FromFile(dlg.FileName);
+                    ImgName = Guid.NewGuid().ToString() + ".jpg";
+                    File.Copy(filePath, System.IO.Path.Combine(imageFolderSave, ImgName));
+                    if (!Directory.Exists(imageFolderSave))
+                    {
+                        Directory.CreateDirectory(imageFolderSave);
+                    }
+                    var bmpOrigin = new System.Drawing.Bitmap(img);
+                    // ImgName= dlg.SafeFileName ;
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Щось пішло не так {ex.Message}");
+                }
+            }
+            MessageBox.Show(dgViewDB.Items[0].ToString());
+
+            if (dgViewDB.SelectedItem != null)
+            {
+                int ind = 0;
+                ind = users.IndexOf(dgViewDB.SelectedItem as User);
+
+
+                con.Open();
+                SQLiteCommand cmd = new SQLiteCommand("UPDATE tblUsers Set Image=@Image Where Id=@Id", con);
+                cmd.Parameters.AddWithValue("Id", users[ind].Id);
+                cmd.Parameters.AddWithValue("Image", ImgName);
+                cmd.ExecuteNonQuery();
+                con.Close();
+                MessageBox.Show("Record Update Successfully", "Updated", MessageBoxButton.OK);
+                SearchUsers();
+            }
         }
     }
 
