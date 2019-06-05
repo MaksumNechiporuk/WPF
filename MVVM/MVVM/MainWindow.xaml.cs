@@ -56,8 +56,8 @@ namespace MVVM
         private void SearchUsers()
         {
             string searchName = txtName.Text;
-     
-         
+
+            bool c1 = false;
             int beginItem = countItemPage * (currentPage - 1);
             int countUsersDB = 0;
             users.Clear();
@@ -73,10 +73,18 @@ namespace MVVM
             if (!string.IsNullOrEmpty(searchName))
             {
                 query += $" WHERE Name LIKE '%{searchName}%'";
+                if (c == true)
+                {
+                    query += $"  AND DayOfBir LIKE '%{searchDate}%'";
+         
+                    c = false;
+                    c1 = true;
+                }
             }
             if (c== true)
             {
-                query += $" WHERE Name LIKE '%{searchDate}%'";
+                query += $"  WHERE DayOfBir LIKE '%{searchDate}%'";
+                c1 = true;
             }
              cmd = new SQLiteCommand(query, con);
              reader = cmd.ExecuteReader();
@@ -104,9 +112,9 @@ namespace MVVM
                 {
                     query += $" AND  Name LIKE '%{searchName}%' ";
                 }
-                if (c == true)
+                if (c1 == true)
                 {
-                    query += $" AND WHERE DayOfBir LIKE '%{searchDate}%' ";
+                    query += $" AND  DayOfBir LIKE '%{searchDate}%' ";
                 }
                 query += $"  ORDER BY Id LIMIT {countItemPage} OFFSET {beginItem}";
                 cmd.CommandText = query;
@@ -360,6 +368,11 @@ namespace MVVM
         private void BtnSearch_Click(object sender, RoutedEventArgs e)
         {
             SearchUsers();
+            txtName.Clear();
+            BDate.Text = null;
+
+
+            img.Source = null;
             GenerateButtonSimple(countPage);
             btnShow.IsEnabled = true;
          //   BDate.ClearValue();
@@ -369,7 +382,13 @@ namespace MVVM
 
         private void BtnShow_Click(object sender, RoutedEventArgs e)
         {
+            txtName.Clear();
+            BDate.Text = null;
+
+
+            img.Source = null;
             SearchUsers();
+           
             GenerateButtonSimple(countPage);
             btnShow.IsEnabled = false;
 
