@@ -46,12 +46,12 @@ namespace MVVM
         public MainWindow()
         {
             InitializeComponent();
-            //   Generation();
+           // Generation();
             PathImagDic = System.IO.Path.Combine(Directory.GetCurrentDirectory(), imageFolderSave);
 
             SearchUsers();
-           GenerateButtonSimple(countPage);
-            MessageBox.Show(PathImagDic);
+            GenerateButtonSimple(countPage);
+            //    MessageBox.Show(PathImagDic);
         }
         private void SearchUsers()
         {
@@ -62,6 +62,10 @@ namespace MVVM
             int countUsersDB = 0;
             users.Clear();
             con.Open();
+
+
+
+
             string query = "SELECT COUNT(*) as countUsers FROM tblUsers";
             if (!string.IsNullOrEmpty(searchName))
             {
@@ -79,31 +83,34 @@ namespace MVVM
             }
             reader.Close();
             query = $"SELECT Id, Name, DayOfBir, Image From tblUsers ";
-          //  query += $" WHERE Image LIKE '%http%'";
+            query += $" WHERE Image LIKE '%http%' ";
 
             if (!string.IsNullOrEmpty(searchName))
             {
-                query += $" WHERE Name LIKE '%{searchName}%'";
+                query += $" AND  Name LIKE '%{searchName}%' ";
             }
-            if (c== true)
+            if (c == true)
             {
-                query += $" WHERE DayOfBir LIKE '%{searchDate}%'";
+                query += $" AND WHERE DayOfBir LIKE '%{searchDate}%' ";
             }
-            query += $"ORDER BY Id LIMIT {countItemPage} OFFSET {beginItem}";
+           query += $"  ORDER BY Id LIMIT {countItemPage} OFFSET {beginItem}";
             cmd.CommandText = query;
             reader = cmd.ExecuteReader();
-           try
+          // try
             {
 
                 ImageFromEthernet(reader);
                 reader.Close();
+                query = $"  SELECT Id, Name, DayOfBir, Image From tblUsers ";
+                query += $" WHERE Image  NOT LIKE '%http%' AND  {beginItem}  <= Id ";
+               // query += $"ORDER BY Id LIMIT {countItemPage} OFFSET {beginItem}";
                 cmd.CommandText = query;
-                query = $"SELECT Id, Name, DayOfBir, Image From tblUsers ";
-                query += " WHERE Image  NOT LIKE   '%/%' ";
-               reader = cmd.ExecuteReader();
+
+                reader = cmd.ExecuteReader();
                 ImageFromDirectory(reader);
             }
-           catch { }
+
+          // catch { }
             con.Close();
             dgViewDB.ItemsSource = users;
             countPage = countUsersDB / countItemPage;
@@ -123,16 +130,19 @@ namespace MVVM
                     Id = id,
                     Name = reader["Name"].ToString(),
                     Birthday = DateTime.Parse(reader["DayOfBir"].ToString(), new CultureInfo("ru-RU")),
-                };
+                    PathImg = System.IO.Path.Combine(PathImagDic,reader["Image"].ToString())
+            };
                 user.Birthday = DateTime.Parse(user.Birthday.ToShortDateString(), new CultureInfo("ru-RU"));
                 users.Add(user);
             }
-            foreach (var item in users)
-            {
-                item.PathImg = System.IO.Path.Combine(PathImagDic, imageNames[i]);
+            //foreach (var item1 in imageNames)
+            //foreach (var item in users)
+            //{
+            //        if(item.PathImg==item1)
+            //    item.PathImg = System.IO.Path.Combine(PathImagDic, item1);
 
-            i++;
-            }
+            //i++;
+            //}
         }
         void ImageFromEthernet(SQLiteDataReader reader)
         {
@@ -159,7 +169,7 @@ namespace MVVM
                 .RuleFor(o=>o.Birthday, f=>f.Date.Between(new DateTime(1950, 1, 1),  DateTime.Now))
                 .RuleFor(o=>o.PathImg,f=> f.Internet.Avatar());
             //PicsumUrl()
-            var list = userFaker.Generate(200);
+            var list = userFaker.Generate(199);
             foreach (var user in list)
             {
                 string name = user.Name;
@@ -322,13 +332,22 @@ namespace MVVM
             con.Close();
       
             c = false;
+            txtName.Clear();
+            BDate.Text = null;
+
+
+            img.Source = null;
             SearchUsers();
         }
 
         private void BDate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
-            searchDate = BDate.SelectedDate.Value;
-            c = true;
+            try
+            {
+                searchDate = BDate.SelectedDate.Value;
+                c = true;
+            }
+            catch { }
         }
 
         private void BtnSearch_Click(object sender, RoutedEventArgs e)
@@ -358,7 +377,7 @@ namespace MVVM
         {
          //   try
             {
-               d = dgViewDB.Items[a] as DataRowView;
+               d = dgViewDB.Items.CurrentItem as DataRowView;
                 SQLiteCommand cmd;
                 con.Open();  
                 string query = $"Delete FROM tblUsers where Name='{d["Name"].ToString()}'";
