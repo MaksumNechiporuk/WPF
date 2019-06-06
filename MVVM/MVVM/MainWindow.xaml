@@ -27,7 +27,7 @@
             <WrapPanel x:Name="wpPaginationButtons">
             </WrapPanel>
         </StackPanel>
-        <DataGrid x:Name="dgViewDB" Height="300" Margin="0,-750,0,-372" AutoGenerateColumns="False"   Width="790" SelectionChanged="DgViewDB_SelectionChanged">
+        <DataGrid x:Name="dgViewDB" Height="300" Margin="0,-750,0,-372" AutoGenerateColumns="False"   Width="790" >
             <DataGrid.ContextMenu>
                 <ContextMenu>
                     <MenuItem Header="Edit" x:Name="EditMenuItem" Click="EditMenuItem_Click" />

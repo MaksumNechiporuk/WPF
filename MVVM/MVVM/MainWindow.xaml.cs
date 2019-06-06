@@ -29,32 +29,29 @@ namespace MVVM
     /// </summary>
     public partial class MainWindow : Window
     {
-        int countPage=0;
-        string ImgName;
+        int countPage = 0;
+      public  string ImgName;
         string imageFolderSave = "Image";
         string PathImagDic;
-        DataRowView d;
 
-
-        ObservableCollection<User> users = new ObservableCollection<User>();
+        UserService service;
+   public     ObservableCollection<User> users = new ObservableCollection<User>();
         int currentPage = 1;
         DateTime searchDate;
         int countItemPage = 100;
-        SQLiteConnection con = new SQLiteConnection($"Data source={"dbUsers.sqlite"};datetimeformat=CurrentCulture");
         List<int> Pages = new List<int>();
-        bool c = false;
+       public bool check = false;
         public MainWindow()
         {
             InitializeComponent();
-         //   Generation();
- 
-           PathImagDic = System.IO.Path.Combine(Directory.GetCurrentDirectory(), imageFolderSave);
+            // Generation();
+            service = new UserService(this);
+            PathImagDic = System.IO.Path.Combine(Directory.GetCurrentDirectory(), imageFolderSave);
 
             SearchUsers();
-           GenerateButtonSimple(countPage);
-            //    MessageBox.Show(PathImagDic);
+            GenerateButtonSimple(countPage);
         }
-        private void SearchUsers()
+        public void SearchUsers()
         {
             string searchName = txtName.Text;
 
@@ -62,6 +59,7 @@ namespace MVVM
             int beginItem = countItemPage * (currentPage - 1);
             int countUsersDB = 0;
             users.Clear();
+            SQLiteConnection con = new SQLiteConnection($"Data source={"dbUsers.sqlite"};datetimeformat=CurrentCulture");
             con.Open();
 
 
@@ -74,15 +72,15 @@ namespace MVVM
             if (!string.IsNullOrEmpty(searchName))
             {
                 query += $" WHERE Name LIKE '%{searchName}%'";
-                if (c == true)
+                if (check == true)
                 {
                     query += $"  AND DayOfBir LIKE '%{searchDate}%'";
 
-                    c = false;
+                    check = false;
                     c1 = true;
                 }
             }
-            if (c == true)
+            if (check == true)
             {
                 query += $"  WHERE DayOfBir LIKE '%{searchDate}%'";
                 c1 = true;
@@ -95,23 +93,10 @@ namespace MVVM
             }
             reader.Close();
 
-            // try
+            try
             {
 
-                query = $"  SELECT Id, Name, DayOfBir, Image From tblUsers ";
-                query += $" WHERE Image  NOT LIKE '%http%' AND   {beginItem}  <= Id  AND  {beginItem + countItemPage}  >= Id ";
-                if (!string.IsNullOrEmpty(searchName))
-                {
-                    query += $" AND  Name LIKE '%{searchName}%' ";
-                }
-                if (c1 == true)
-                {
-                    query += $" AND  DayOfBir LIKE '%{searchDate}%' ";
-                }
-                cmd.CommandText = query;
-                reader = cmd.ExecuteReader();
-                ImageFromDirectory(reader);
-                reader.Close();
+
                 query = $"SELECT Id, Name, DayOfBir, Image From tblUsers ";
                 query += $" WHERE Image LIKE '%http%' ";
 
@@ -128,15 +113,28 @@ namespace MVVM
                 reader = cmd.ExecuteReader();
                 ImageFromEthernet(reader);
                 reader.Close();
-
+                query = $"  SELECT Id, Name, DayOfBir, Image From tblUsers ";
+                query += $" WHERE Image  NOT LIKE '%http%' AND   {beginItem}  <= Id  AND  {beginItem + countItemPage}  >= Id ";
+                if (!string.IsNullOrEmpty(searchName))
+                {
+                    query += $" AND  Name LIKE '%{searchName}%' ";
+                }
+                if (c1 == true)
+                {
+                    query += $" AND  DayOfBir LIKE '%{searchDate}%' ";
+                }
+                cmd.CommandText = query;
+                reader = cmd.ExecuteReader();
+                ImageFromDirectory(reader);
+                reader.Close();
             }
 
-            // catch { }
+            catch { }
             con.Close();
             dgViewDB.ItemsSource = users;
             countPage = countUsersDB / countItemPage;
-            countPage+=2;
-            c = false;
+            countPage++;
+            check = false;
         }
         void ImageFromDirectory(SQLiteDataReader reader)
         {
@@ -148,12 +146,13 @@ namespace MVVM
                     Id = id,
                     Name = reader["Name"].ToString(),
                     Birthday = DateTime.Parse(reader["DayOfBir"].ToString(), new CultureInfo("ru-RU")),
-                    PathImg = System.IO.Path.Combine(PathImagDic,reader["Image"].ToString())
-            };
+                    PathImg = System.IO.Path.Combine(PathImagDic, reader["Image"].ToString())
+                };
                 user.Birthday = DateTime.Parse(user.Birthday.ToShortDateString(), new CultureInfo("ru-RU"));
                 users.Add(user);
             }
-           
+
+
         }
         void ImageFromEthernet(SQLiteDataReader reader)
         {
@@ -170,20 +169,20 @@ namespace MVVM
                 user.Birthday = DateTime.Parse(user.Birthday.ToShortDateString(), new CultureInfo("ru-RU"));
                 users.Add(user);
             }
-           // MessageBox.Show(users[0].PathImg);
         }
         private void Generation()
         {
+            SQLiteConnection con = new SQLiteConnection($"Data source={"dbUsers.sqlite"};datetimeformat=CurrentCulture");
             con.Open();
             var userFaker = new Faker<User>("uk")
                 .RuleFor(o => o.Name, f => f.Name.FirstName())
-                .RuleFor(o=>o.Birthday, f=>f.Date.Between(new DateTime(1950, 1, 1),  DateTime.Now))
-                .RuleFor(o=>o.PathImg,f=> f.Internet.Avatar());
+                .RuleFor(o => o.Birthday, f => f.Date.Between(new DateTime(1950, 1, 1), DateTime.Now))
+                .RuleFor(o => o.PathImg, f => f.Internet.Avatar());
             var list = userFaker.Generate(3000);
             foreach (var user in list)
             {
                 string name = user.Name;
-                DateTime date= DateTime.Parse(user.Birthday.ToShortDateString(), new CultureInfo("ru-RU"));
+                DateTime date = DateTime.Parse(user.Birthday.ToShortDateString(), new CultureInfo("ru-RU"));
 
                 string query = $"Insert into tblUsers(Name,DayOfBir,Image) values('{name}','{date}','{user.PathImg}')";
                 SQLiteCommand cmd = new SQLiteCommand(query, con);
@@ -192,42 +191,42 @@ namespace MVVM
             con.Close();
             SearchUsers();
         }
-        private void GenerateButton(int count,bool c )
+        private void GenerateButton(int count, bool c)
         {
             wpPaginationButtons.Children.Clear();
-            if(c==true)
-            for (int k=0, i = currentPage-5; k<11;k++, i++)
-            {
-                    if (i < 1 )
+            if (c == true)
+                for (int k = 0, i = currentPage - 5; k < 11; k++, i++)
+                {
+                    if (i < 1)
                     {
                         i = 0;
                         continue;
 
                     }
                     Button btn = new Button();
-                btn.Height = 25;
-                btn.Width = 40;
-                btn.Tag = i;
-                btn.Content = i;
-                btn.VerticalAlignment = VerticalAlignment.Top;
-                btn.Margin = new Thickness(5, 5, 5, 5);
-                Pages.Add(i);
-                wpPaginationButtons.Children.Add(btn);
-                btn.Click += Btn_Click;
+                    btn.Height = 25;
+                    btn.Width = 40;
+                    btn.Tag = i;
+                    btn.Content = i;
+                    btn.VerticalAlignment = VerticalAlignment.Top;
+                    btn.Margin = new Thickness(5, 5, 5, 5);
+                    Pages.Add(i);
+                    wpPaginationButtons.Children.Add(btn);
+                    btn.Click += Btn_Click;
                     if (i == count)
                         break;
                 }
-           else  if(c==false)
+            else if (c == false)
             {
-                int j = currentPage-5;
-                for (int k=0, i = 3 + currentPage; k<11;k++, i--)
+                int j = currentPage - 5;
+                for (int k = 0, i = 3 + currentPage; k < 11; k++, i--)
                 {
-                    if (i < 1 ||j < 1)
+                    if (i < 1 || j < 1)
                     {
                         j++;
                         continue;
                     }
-                        Button btn = new Button();
+                    Button btn = new Button();
                     btn.Height = 25;
                     btn.Width = 40;
                     btn.Tag = j;
@@ -244,39 +243,39 @@ namespace MVVM
         private void GenerateButtonSimple(int count)
         {
             wpPaginationButtons.Children.Clear();
-       
-                for (int i = currentPage; i <= 9 + currentPage; i++)
-                {
 
-                    Button btn = new Button();
-                    btn.Height = 25;
-                    btn.Width = 40;
-                    btn.Tag = i;
-                    btn.Content = i;
-                    btn.VerticalAlignment = VerticalAlignment.Top;
-                    btn.Margin = new Thickness(5, 5, 5, 5);
-                    Pages.Add(i);
-                    wpPaginationButtons.Children.Add(btn);
+            for (int i = currentPage; i <= 9 + currentPage; i++)
+            {
+
+                Button btn = new Button();
+                btn.Height = 25;
+                btn.Width = 40;
+                btn.Tag = i;
+                btn.Content = i;
+                btn.VerticalAlignment = VerticalAlignment.Top;
+                btn.Margin = new Thickness(5, 5, 5, 5);
+                Pages.Add(i);
+                wpPaginationButtons.Children.Add(btn);
                 btn.Background = Brushes.White;
                 btn.Click += Btn_Click;
-                    if (i == count)
-                        break;
-                }
-               
+                if (i == count)
+                    break;
+            }
+
         }
         private void Btn_Click(object sender, RoutedEventArgs e)
         {
             Button btn = sender as Button;
             currentPage = int.Parse(btn.Tag.ToString());
             btn.Background = Brushes.Blue;
-           
+
             if (currentPage == Pages[Pages.Count - 1] && countPage != currentPage)
             {
                 Pages.Clear();
                 GenerateButton(countPage, true);
 
             }
-          else   if (currentPage == Pages[0]&& Pages[0]!=1)
+            else if (currentPage == Pages[0] && Pages[0] != 1)
             {
                 Pages.Clear();
                 GenerateButton(countPage, false);
@@ -311,7 +310,7 @@ namespace MVVM
                 {
                     var filePath = dlg.FileName;
                     var image = System.Drawing.Image.FromFile(dlg.FileName);
-                       ImgName = Guid.NewGuid().ToString() + ".jpg";
+                    ImgName = Guid.NewGuid().ToString() + ".jpg";
                     File.Copy(filePath, System.IO.Path.Combine(imageFolderSave, ImgName));
                     if (!Directory.Exists(imageFolderSave))
                     {
@@ -327,22 +326,8 @@ namespace MVVM
         }
         private void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
-
-            con.Open();
-            string name = txtName.Text;
-
-            string query = $"Insert into tblUsers(Name,DayOfBir,Image) values('{name}','{ BDate.SelectedDate}','{ ImgName}')";
-            SQLiteCommand cmd = new SQLiteCommand(query, con);
-            cmd.ExecuteNonQuery();
-            con.Close();
-      
-            c = false;
-            txtName.Clear();
-            BDate.Text = null;
-
-
-            img.Source = null;
-            SearchUsers();
+            service.Insert();
+            
         }
 
         private void BDate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
@@ -350,7 +335,7 @@ namespace MVVM
             try
             {
                 searchDate = BDate.SelectedDate.Value;
-                c = true;
+                check = true;
             }
             catch { }
         }
@@ -365,7 +350,6 @@ namespace MVVM
 
             img.Source = null;
             btnShow.IsEnabled = true;
-         //   BDate.ClearValue();
 
 
         }
@@ -378,7 +362,7 @@ namespace MVVM
 
             img.Source = null;
             SearchUsers();
-           
+
             GenerateButtonSimple(countPage);
             btnShow.IsEnabled = false;
 
@@ -386,49 +370,15 @@ namespace MVVM
 
         private void EditMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            btnUpdate.IsEnabled = true;
-            if (dgViewDB.SelectedItem != null)
-            {
-                btnAdd.IsEnabled = false;
-                btnAddImg.IsEnabled = false;
-                btnSearch.IsEnabled = false;
-                int ind = 0;
-                ind = users.IndexOf(dgViewDB.SelectedItem as User);
-                lblId.Content = users[ind].Id;
-                txtName.Text= users[ind].Name;
-                img.Source = new BitmapImage(new Uri(users[ind].PathImg)); 
-            }
+            service.Edit();
 
         }
 
         private void DeleteMenuItem_Click(object sender, RoutedEventArgs e)
         {
-              try
-            {
-                if (dgViewDB.SelectedItem != null)
-                {
-                    int ind = 0;
-                    ind = users.IndexOf(dgViewDB.SelectedItem as User);
-                    
-
-                    SQLiteCommand cmd;
-                    con.Open();
-                    string query = $"Delete FROM tblUsers where Id='{users[ind].Id}'";
-                    cmd = new SQLiteCommand(query, con);
-                    cmd.ExecuteNonQuery();
-                    con.Close();
-                    users.RemoveAt(ind);
-                    SearchUsers();
-                }
-            }
-            catch
-            {
-            }
+            service.Delete();
         }
-        private void DgViewDB_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-                
-        }
+       
 
         private void UserImage_MouseDown(object sender, MouseButtonEventArgs e)
         {
@@ -453,7 +403,6 @@ namespace MVVM
                         Directory.CreateDirectory(imageFolderSave);
                     }
                     var bmpOrigin = new System.Drawing.Bitmap(img);
-                    // ImgName= dlg.SafeFileName ;
                 }
                 catch (Exception ex)
                 {
@@ -466,7 +415,7 @@ namespace MVVM
                 int ind = 0;
                 ind = users.IndexOf(dgViewDB.SelectedItem as User);
 
-
+                SQLiteConnection con = new SQLiteConnection($"Data source={"dbUsers.sqlite"};datetimeformat=CurrentCulture");
                 con.Open();
                 SQLiteCommand cmd = new SQLiteCommand("UPDATE tblUsers Set Image=@Image Where Id=@Id", con);
                 cmd.Parameters.AddWithValue("Id", users[ind].Id);
@@ -479,34 +428,109 @@ namespace MVVM
 
         private void BtnUpdate_Click(object sender, RoutedEventArgs e)
         {
-            try
+            service.Update();
+        }
+        public class UserService
+        {
+            MainWindow window;
+            public UserService(MainWindow main)
             {
+                window = main;
+            }
+            public void Insert()
+            {
+                SQLiteConnection con = new SQLiteConnection($"Data source={"dbUsers.sqlite"};datetimeformat=CurrentCulture");
                 con.Open();
+                string name = window.txtName.Text;
 
-                SQLiteCommand cmd = new SQLiteCommand("UPDATE tblUsers Set Name=@Name  Where Id=@Id", con);
-                cmd.Parameters.AddWithValue("Id", lblId.Content);
-                cmd.Parameters.AddWithValue("Name", txtName.Text);
-                btnAdd.IsEnabled = true;
-                btnAddImg.IsEnabled = true;
-                btnSearch.IsEnabled = true;
-                btnAdd.IsEnabled = true;
-
+                string query = $"Insert into tblUsers(Name,DayOfBir,Image) values('{name}','{ window.BDate.SelectedDate}','{  window.ImgName}')";
+                SQLiteCommand cmd = new SQLiteCommand(query, con);
                 cmd.ExecuteNonQuery();
                 con.Close();
-                txtName.Clear();
-                BDate.Text = null;
+
+                window.check = false;
+                window.txtName.Clear();
+                window.BDate.Text = null;
 
 
-                img.Source = null;
-                SearchUsers();
-
+                window.img.Source = null;
+                window.SearchUsers();
             }
-            catch (Exception ex)
+            public void Edit()
             {
-                MessageBox.Show(ex.Message);
+                SQLiteConnection con = new SQLiteConnection($"Data source={"dbUsers.sqlite"};datetimeformat=CurrentCulture");
+                window.btnUpdate.IsEnabled = true;
+                if (window.dgViewDB.SelectedItem != null)
+                {
+                    window.btnAdd.IsEnabled = false;
+                    window.btnAddImg.IsEnabled = false;
+                    window.btnSearch.IsEnabled = false;
+                    int ind = 0;
+                    ind = window.users.IndexOf(window.dgViewDB.SelectedItem as User);
+                    window.lblId.Content = window.users[ind].Id;
+                    window.txtName.Text = window.users[ind].Name;
+                    window.img.Source = new BitmapImage(new Uri(window.users[ind].PathImg));
+                }
             }
+            public void Delete()
+            {
+                SQLiteConnection con = new SQLiteConnection($"Data source={"dbUsers.sqlite"};datetimeformat=CurrentCulture");
+                //  try
+                {
+
+                    if (window.dgViewDB.SelectedItem != null)
+                    {
+                        int ind = 0;
+                        ind = window.users.IndexOf(window.dgViewDB.SelectedItem as User);
+
+
+                        SQLiteCommand cmd;
+                        con.Open();
+                        string query = $"Delete FROM tblUsers where Id='{window.users[ind].Id}'";
+                        cmd = new SQLiteCommand(query, con);
+                        cmd.ExecuteNonQuery();
+                        con.Close();
+                        window.users.RemoveAt(ind);
+                        window.SearchUsers();
+                    }
+                }
+                // catch
+                {
+                }
+            }
+            public void Update()
+            {
+                SQLiteConnection con = new SQLiteConnection($"Data source={"dbUsers.sqlite"};datetimeformat=CurrentCulture");
+                try
+                {
+                    con.Open();
+
+                    SQLiteCommand cmd = new SQLiteCommand("UPDATE tblUsers Set Name=@Name  Where Id=@Id", con);
+                    cmd.Parameters.AddWithValue("Id", window.lblId.Content);
+                    cmd.Parameters.AddWithValue("Name", window.txtName.Text);
+                    window.btnAdd.IsEnabled = true;
+                    window.btnAddImg.IsEnabled = true;
+                    window.btnSearch.IsEnabled = true;
+                    window.btnAdd.IsEnabled = true;
+
+                    cmd.ExecuteNonQuery();
+                    con.Close();
+                    window.txtName.Clear();
+                    window.BDate.Text = null;
+
+
+                    window.img.Source = null;
+                    window.SearchUsers();
+
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
+
         }
     }
-
    
+
 }
