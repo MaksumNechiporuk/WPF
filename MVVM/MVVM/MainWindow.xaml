@@ -7,26 +7,30 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="804">
     <DockPanel >
-       
+
         <StackPanel DockPanel.Dock="Top" Margin="0,0,0,350" Height="108">
             <TextBox x:Name="txtName" HorizontalAlignment="Left" Height="23" Margin="100,13,0,0" TextWrapping="Wrap"  Width="120"/>
-            <Button x:Name="btnAdd" Content="Add users" HorizontalAlignment="Left" Margin="608,-50,0,0"  Width="75" Click="BtnAdd_Click" Height="21"/>
-            <Label Content="Name" HorizontalAlignment="Left" Margin="30,-25,0,0"/>
-            <DatePicker x:Name="BDate" HorizontalAlignment="Left" Margin="230,-25,0,0" SelectedDateChanged="BDate_SelectedDateChanged" />
-            <Button x:Name="btnAddImg" Content="Add img" HorizontalAlignment="Left" Margin="340,-25,0,0" Width="75" Click="BtnAddImg_Click"/>
-            <Image x:Name="img" HorizontalAlignment="Left" Height="77" Margin="430,-30,0,0" VerticalAlignment="Top" Width="93"/>
-            <Button x:Name="btnSearch" Content="Search" Height="25" Margin="700,-80,0,0" VerticalAlignment="Top" Width="75" Click="BtnSearch_Click" />
-            <Button x:Name="btnShow" Content="Show all" Height="25" Width="70"  Margin="700,-70,0,0" Click="BtnShow_Click" IsEnabled="False"/>
+            <Button x:Name="btnAdd" Content="Add users" HorizontalAlignment="Left" Margin="620,-40,0,0"  Width="75" Click="BtnAdd_Click" Height="21"/>
+            <Button x:Name="btnUpdate" Content="Update" HorizontalAlignment="Left" Margin="620,0,0,0"  Width="75" Click="BtnUpdate_Click"  Height="21" IsEnabled="False"/>
 
+            <Label Content="Name" HorizontalAlignment="Left" Margin="60,-65,0,0" Height="29"/>
+            <DatePicker x:Name="BDate" HorizontalAlignment="Left" Margin="230,-65,0,0" SelectedDateChanged="BDate_SelectedDateChanged" Height="27" />
+            <Button x:Name="btnAddImg" Content="Add img" HorizontalAlignment="Left" Margin="340,-25,0,0" Width="75" Click="BtnAddImg_Click"/>
+            <Image x:Name="img"   Height="64" Margin="190,-50,0,0" VerticalAlignment="Top" Width="103" />
+            <Button x:Name="btnSearch" Content="Search" Height="23" Margin="710,-65,10,0" VerticalAlignment="Top" Width="75" Click="BtnSearch_Click" />
+            <Button x:Name="btnShow" Content="Show all" Height="22" Width="70"  Margin="713,-50,13,0" Click="BtnShow_Click" IsEnabled="False"/>
+            <Label Name="lblId" HorizontalAlignment="Left" Margin="10,-110,0,0" Height="29"/>
+        
+       
         </StackPanel>
-        <StackPanel DockPanel.Dock="Bottom" Height="44" Margin="0,-60,0,0">
+        <StackPanel DockPanel.Dock="Bottom" Height="44" Margin="0,-45,0,0">
             <WrapPanel x:Name="wpPaginationButtons">
             </WrapPanel>
         </StackPanel>
-        <DataGrid x:Name="dgViewDB" Height="253" Margin="0,-800,0,-372" AutoGenerateColumns="False"   Width="790" SelectionChanged="DgViewDB_SelectionChanged">
+        <DataGrid x:Name="dgViewDB" Height="300" Margin="0,-750,0,-372" AutoGenerateColumns="False"   Width="790" SelectionChanged="DgViewDB_SelectionChanged">
             <DataGrid.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Edit login" x:Name="EditMenuItem" Click="EditMenuItem_Click" />
+                    <MenuItem Header="Edit" x:Name="EditMenuItem" Click="EditMenuItem_Click" />
                     <MenuItem Header="Delete" x:Name="DeleteMenuItem" Click="DeleteMenuItem_Click"/>
 
                 </ContextMenu>
@@ -51,7 +55,7 @@
                     <TranslateTransform X="-1.069"/>
                 </TransformGroup>
             </DataGrid.RenderTransform>
-               
+
             <DataGrid.RowDetailsTemplate>
                 <DataTemplate x:Name="abc">
                     <DockPanel x:Name="dockPanelUser" Background="GhostWhite">
